@@ -43,7 +43,7 @@ const ALL_VARS = [
     "simuEnergy2"
 ]
 
-const FOIL_EFFECTS_VARS = [
+const VERTEX_POS_VARS = [
     "x1SD",
     "y1SD",
     "z1SD",
@@ -60,4 +60,22 @@ const FOIL_EFFECTS_VARS = [
     "recoEnergy2",
     "simuEnergy1",
     "simuEnergy2"
+]
+
+const ANGLES_VARS = [
+    "theta",
+    "px1SE",
+    "py1SE",
+    "pz1SE",
+    "px2SE",
+    "py2SE",
+    "pz2SE",
+    "phiSE",
+    "phiRE",
+    "recoEnergy1",
+    "recoEnergy2",
+    "simuEnergy1",
+    "simuEnergy2",
+    "z1RE",
+    "z2RE",
 ]

@@ -5,7 +5,8 @@ export
     CAT_FILE,
     TIT_FILE,
     ALL_VARS,
-    FOIL_EFFECTS_VARS
+    VERTEX_POS_VARS,
+    ANGLES_VARS
 
 include("Load.jl")
 export 
@@ -15,10 +16,21 @@ include("MakieUtils.jl")
 export 
     my_makie_theme
 
-include("PlottingUtils.jl")
+include("PlotSettings.jl")
 export 
-    plot_foil_all_histos,
+    plot_all_histos
+
+include("VertexPlots.jl")
+export 
     plot_foil_yz_vertex_map,
     plot_foil_yz_distance,
-    plot_foil_3D_distance
+    plot_foil_3D_distance,
+    plot_foil_d_vs_r,
+    plot_foil_t_vs_r,
+    plot_foil_t_vs_d
+
+include("AnglesPlots.jl")
+export 
+    plot_angles_1D
+
 end

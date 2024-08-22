@@ -1,3 +1,9 @@
+#######################################################
+#######################################################
+#######          VERTEX POSITIONS               #######
+#######################################################
+#######################################################
+
 using DrWatson
 @quickactivate "SNDetectorEffects"
 using Revise
@@ -9,21 +15,23 @@ Revise.track(DetectorEffects)
 set_theme!(my_makie_theme())
 
 # DATA PREPARATION
-data = load_data(TIT_FILE, FOIL_EFFECTS_VARS)
+data = load_data(TIT_FILE, VERTEX_POS_VARS)
 
 # FakeItTillYouMakeIt events have SE set to 0, we can filter them out now
 filter!(row -> (row.y1SE != 0.0 && row.y2SE != 0.0), data)
 
-df = DataFrame(
+df_vertex = DataFrame(
     xSD=vcat(data.x1SD, data.x2SD),
     ySD=vcat(data.y1SD, data.y2SD),
     zSD=vcat(data.z1SD, data.z2SD),
     xSE=vcat(data.x1SE, data.x2SE),
     ySE=vcat(data.y1SE, data.y2SE),
-    zSE=vcat(data.z1SE, data.z2SE)
+    zSE=vcat(data.z1SE, data.z2SE),
+    simuE=vcat(data.simuEnergy1, data.simuEnergy2),
+    recoE=vcat(data.recoEnergy1, data.recoEnergy2)
 )
 
-@chain df begin
+@chain df_vertex begin
     # add column for 3D distance traveled within foil bulk
     @transform! :d = @. sqrt((:xSD - :xSE)^2 + (:ySD - :ySE)^2 + (:zSD - :zSE)^2)
 
@@ -43,22 +51,29 @@ df = DataFrame(
 end
 
 # quick glance at data
-describe(df)
-
+describe(df_vertex)
 
 # PLOTS
-f_foil_all_histos = plot_foil_all_histos(df)
-safesave(plotsdir("foil_effects", "plot_foil_all_histos.png"), f_foil_all_histos)
+f_all_histos = plot_all_histos(df_vertex)
+safesave(plotsdir("foil_effects", "plot_all_histos.png"), f_all_histos)
 
-f_foil_yz_vertex_map = plot_foil_yz_vertex_map(df)
+f_foil_yz_vertex_map = plot_foil_yz_vertex_map(df_vertex)
 safesave(plotsdir("foil_effects", "plot_foil_yz_vertex_map.png"), f_foil_yz_vertex_map)
 
-f_foil_yz_distance = plot_foil_yz_distance(df)
+f_foil_yz_distance = plot_foil_yz_distance(df_vertex)
 safesave(plotsdir("foil_effects", "plot_foil_yz_distance.png"), f_foil_yz_distance)
 
-f_foil_3D_distance = plot_foil_3D_distance(df)
+f_foil_3D_distance = plot_foil_3D_distance(df_vertex)
 safesave(plotsdir("foil_effects", "plot_foil_3D_distance.png"), f_foil_3D_distance)
 
+f_foil_d_vs_r = plot_foil_d_vs_r(df_vertex)
+safesave(plotsdir("foil_effects", "TIT_plot_foil_d_vs_r.png"), f_foil_d_vs_r)
 
-plot_foil_yz_distance(df; t_range=(0.0, 0.05))
-#
+f_foil_t_vs_r = plot_foil_t_vs_r(df_vertex)
+safesave(plotsdir("foil_effects", "TIT_plot_foil_t_vs_r.png"), f_foil_t_vs_r)
+
+f_foil_t_vs_d = plot_foil_t_vs_d(df_vertex)
+safesave(plotsdir("foil_effects", "TIT_plot_foil_t_vs_d.png"), f_foil_t_vs_d)
+
+
+plot_foil_yz_distance(df_vertex; t_range=(0.0, 0.05))

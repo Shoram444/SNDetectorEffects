@@ -7,7 +7,7 @@ function my_makie_theme(spinewidth = 1.5, gridwidth = 1.5)
             titlesize = 24,
             titlefont = :bold,
             titlegap = 4f0,
-            titlealign = :left,
+            titlealign = :center,
             # subtitlesize = 14,
             subtitlegap = 6f0,
             subtitlealign = :left,
@@ -28,6 +28,7 @@ function my_makie_theme(spinewidth = 1.5, gridwidth = 1.5)
             ygridvisible = true,
             xgridwidth = gridwidth,
             ygridwidth = gridwidth,
+            legendfontsize = 36
         ),
         Axis3 = Attributes(
             titlesize = 20,
