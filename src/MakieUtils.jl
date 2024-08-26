@@ -1,10 +1,24 @@
 using Makie, Colors, ColorSchemes, MathTeXEngine
 
+
 function my_makie_theme(spinewidth = 1.5, gridwidth = 1.5)
+    colors = ColorSchemes.tol_vibrant
+    
+    cmap = Makie.to_colormap([ColorSchemes.tol_vibrant[3],ColorSchemes.tol_vibrant[5]])
+    
+    cpalette = Attributes(
+        color = colors,
+        patchcolor = colors,
+        marker = [:circle, :utriangle, :cross, :rect, :diamond, :dtriangle, :pentagon, :xcross],
+        linestyle = [nothing, :dash, :dot, :dashdot, :dashdotdot],
+        side = [:left, :right],
+        Lines = (cycle = Cycle([:color]),),
+    )
 
     return Theme(
+        palette=cpalette,
         Axis = Attributes(
-            titlesize = 24,
+            titlesize = 14,
             titlefont = :bold,
             titlegap = 4f0,
             titlealign = :center,
@@ -20,21 +34,22 @@ function my_makie_theme(spinewidth = 1.5, gridwidth = 1.5)
             yticksvisible = true,
             xticklabelsvisible = true,
             yticklabelsvisible = true,
-            # xticklabelsize = 14,
-            # yticklabelsize = 14,
+            xticklabelsize = 12,
+            yticklabelsize = 12,
             xminorgridvisible = true,
             yminorgridvisible = true,
             xgridvisible = true,
             ygridvisible = true,
             xgridwidth = gridwidth,
             ygridwidth = gridwidth,
-            legendfontsize = 36
+            xautolimitmargin = (0.0f0, 0.0f0),
+			yautolimitmargin = (0.0f0, 0.05f0),
         ),
         Axis3 = Attributes(
-            titlesize = 20,
+            titlesize = 14,
             titlefont = :bold,
             titlegap = 6f0,
-            # subtitlesize = 14,
+            subtitlesize = 12,
             subtitlegap = 6f0,
         ),
         Legend = Attributes(
@@ -49,12 +64,11 @@ function my_makie_theme(spinewidth = 1.5, gridwidth = 1.5)
             :regular => texfont(:regular)
         ),
         Scatter = Attributes(
-			linecolor = ["#65ADC2","#111111",  "#233B43", "#E84646", "#C29365", "#362C21", "#316675", "#168E7F", "#109B37"],
-            markersize = 15,
+            markersize = 5,
             strokewidth = 0,
         ),
 		Heatmap = Attributes(
-			colormap = :viridis,
+			colormap = cmap,
 		),
     )
 end

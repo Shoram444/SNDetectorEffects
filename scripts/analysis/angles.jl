@@ -13,9 +13,10 @@ set_theme!(my_makie_theme())
 #######################################################
 #######################################################
 
-data = load_data(TIT_FILE, ANGLES_VARS)
+df = load_data(TIT_FILE, ANGLES_VARS)
 
-@chain data begin
+# Data wrangling
+@chain df begin
     # FakeItTillYouMakeIt events have SE set to 0, we can filter them out now   
     @subset! @. :py1SE != 0.0 && :py2SE != 0.0
 
@@ -24,8 +25,18 @@ data = load_data(TIT_FILE, ANGLES_VARS)
 end
 
 # quick glance at data
-describe(data)
-plot_all_histos(data)
+describe(df)
+f_all_histos = plot_all_histos(df)
+safesave(plotsdir("angles", "plot_all_histos.png"), f_all_histos)
 
-plot_angles_1D(data)
+
+f_angles_1D = plot_angles_1D(df)
+safesave(plotsdir("angles", "plot_angles_1D.png"), f_angles_1D)
+
+f_angles_theta_vs_phiSE = plot_angles_theta_vs_phiSE(df)
+safesave(plotsdir("angles", "plot_angles_theta_vs_phiSE.png"), f_angles_theta_vs_phiSE)
+
+hh = Hist2D((df.simuEnergy1, df.simuEnergy2))
+plot(hh)
 #
+

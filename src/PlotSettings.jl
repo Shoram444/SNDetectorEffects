@@ -1,10 +1,16 @@
-FIG_size=(800, 800) 
-FIG_fontsize=30 
-FIG_figure_padding=50
+const FIG_pt_per_unit = 1
+const FIG_width = 7          # cm
+const FIG_height = 7          # cm
+const dpi = 72/2.54           # dpi/cm
+const px_per_unit = 21.1666   # equivalent of final 600dpi
+const FIG_size=(FIG_width*dpi, FIG_height*dpi) 
+const FIG_size_w=(FIG_width*dpi*2, FIG_height*dpi) 
+const FIG_fontsize=12
+const FIG_figure_padding=10
 
 function plot_all_histos(df)
     # Create a grid layout for the plots
-    fig = Figure(size=(1600, 1600), fontsize=FIG_fontsize)
+    fig = Figure(size=(800,800), fontsize=FIG_fontsize, figure_padding=5, px_per_unit=1)
     nvars = ncol(df)
     grid_size = Int(ceil(sqrt(nvars)))    # I want to create a nxn figure where each cell is one histogram
 

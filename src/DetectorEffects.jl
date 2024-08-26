@@ -18,7 +18,16 @@ export
 
 include("PlotSettings.jl")
 export 
-    plot_all_histos
+    plot_all_histos,
+    FIG_pt_per_unit, 
+    FIG_width_inch, 
+    FIG_height_inch, 
+    dpi, 
+    px_per_unit,
+    FIG_size,
+    FIG_size_w,
+    FIG_fontsize,
+    FIG_figure_padding
 
 include("VertexPlots.jl")
 export 
@@ -27,10 +36,12 @@ export
     plot_foil_3D_distance,
     plot_foil_d_vs_r,
     plot_foil_t_vs_r,
-    plot_foil_t_vs_d
+    plot_foil_t_vs_d,
+    plot_grid_E_t_vertex_sizes
 
 include("AnglesPlots.jl")
 export 
-    plot_angles_1D
+    plot_angles_1D,
+    plot_angles_theta_vs_phiSE
 
 end

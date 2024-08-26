@@ -61,7 +61,7 @@ f_foil_yz_vertex_map = plot_foil_yz_vertex_map(df_vertex)
 safesave(plotsdir("foil_effects", "plot_foil_yz_vertex_map.png"), f_foil_yz_vertex_map)
 
 f_foil_yz_distance = plot_foil_yz_distance(df_vertex)
-safesave(plotsdir("foil_effects", "plot_foil_yz_distance.png"), f_foil_yz_distance)
+safesave(plotsdir("foil_effects", "plot_foil_yz_distance.png"), f_foil_yz_distance, px_per_unit=5)
 
 f_foil_3D_distance = plot_foil_3D_distance(df_vertex)
 safesave(plotsdir("foil_effects", "plot_foil_3D_distance.png"), f_foil_3D_distance)
@@ -76,4 +76,5 @@ f_foil_t_vs_d = plot_foil_t_vs_d(df_vertex)
 safesave(plotsdir("foil_effects", "TIT_plot_foil_t_vs_d.png"), f_foil_t_vs_d)
 
 
-plot_foil_yz_distance(df_vertex; t_range=(0.0, 0.05))
+f_plot_grid_E_t_vertex_sizes = plot_grid_E_t_vertex_sizes(df_vertex; f_size = (600, 400))
+safesave(plotsdir("foil_effects", "TIT_plot_grid_E_t_vertex_sizes.png"), f_plot_grid_E_t_vertex_sizes)
