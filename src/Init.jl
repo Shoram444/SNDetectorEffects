@@ -1,7 +1,7 @@
 using FHist, UnROOT, DataFramesMeta, CairoMakie, StatsBase
 
-const CAT_FILE = joinpath("data/sims/CAT.root")
-const TIT_FILE = joinpath("data/sims/TIT.root")
+const CAT_FILE = joinpath("data/sims/Boff/CAT.root")
+const TIT_FILE = joinpath("data/sims/Boff/TIT.root")
 
 const ALL_VARS = [
     "x1SD",

@@ -15,7 +15,7 @@ Revise.track(DetectorEffects)
 set_theme!(my_makie_theme())
 
 # DATA PREPARATION
-data = load_data(TIT_FILE, VERTEX_POS_VARS)
+data = load_data(CAT_FILE, VERTEX_POS_VARS)
 
 # FakeItTillYouMakeIt events have SE set to 0, we can filter them out now
 filter!(row -> (row.y1SE != 0.0 && row.y2SE != 0.0), data)
@@ -67,14 +67,18 @@ f_foil_3D_distance = plot_foil_3D_distance(df_vertex)
 safesave(plotsdir("foil_effects", "plot_foil_3D_distance.png"), f_foil_3D_distance)
 
 f_foil_d_vs_r = plot_foil_d_vs_r(df_vertex)
-safesave(plotsdir("foil_effects", "TIT_plot_foil_d_vs_r.png"), f_foil_d_vs_r)
+safesave(plotsdir("foil_effects", "plot_foil_d_vs_r.png"), f_foil_d_vs_r)
 
 f_foil_t_vs_r = plot_foil_t_vs_r(df_vertex)
-safesave(plotsdir("foil_effects", "TIT_plot_foil_t_vs_r.png"), f_foil_t_vs_r)
+safesave(plotsdir("foil_effects", "plot_foil_t_vs_r.png"), f_foil_t_vs_r)
 
 f_foil_t_vs_d = plot_foil_t_vs_d(df_vertex)
-safesave(plotsdir("foil_effects", "TIT_plot_foil_t_vs_d.png"), f_foil_t_vs_d)
+safesave(plotsdir("foil_effects", "plot_foil_t_vs_d.png"), f_foil_t_vs_d)
 
 
-f_plot_grid_E_t_vertex_sizes = plot_grid_E_t_vertex_sizes(df_vertex; f_size = (600, 400))
-safesave(plotsdir("foil_effects", "TIT_plot_grid_E_t_vertex_sizes.png"), f_plot_grid_E_t_vertex_sizes)
+f_plot_grid_E_t_vertex_sizes = plot_grid_E_t_vertex_sizes(df_vertex; f_size = (600, 400), normed = false)
+safesave(plotsdir("foil_effects", "plot_grid_E_t_vertex_sizes.png"), f_plot_grid_E_t_vertex_sizes)
+
+f_plot_grid_E_t_vertex_sizes_normed = plot_grid_E_t_vertex_sizes(df_vertex; f_size = (600, 400), normed = true)
+safesave(plotsdir("foil_effects", "plot_grid_E_t_vertex_sizes_normed.png"), f_plot_grid_E_t_vertex_sizes_normed)
+
