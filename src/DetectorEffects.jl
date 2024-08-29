@@ -37,7 +37,8 @@ export
     plot_foil_d_vs_r,
     plot_foil_t_vs_r,
     plot_foil_t_vs_d,
-    plot_grid_E_t_vertex_sizes
+    plot_grid_E_t_vertex_sizes,
+    plot_heatmap_E_t_mean_r
 
 include("AnglesPlots.jl")
 export 

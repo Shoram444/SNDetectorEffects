@@ -1,4 +1,4 @@
-using FHist, UnROOT, DataFramesMeta, CairoMakie, StatsBase
+using FHist, UnROOT, DataFramesMeta, CairoMakie, StatsBase, CategoricalArrays
 
 const CAT_FILE = joinpath("data/sims/Boff/CAT.root")
 const TIT_FILE = joinpath("data/sims/Boff/TIT.root")

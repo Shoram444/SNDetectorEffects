@@ -248,3 +248,18 @@ function plot_grid_E_t_vertex_sizes(
     Colorbar(fig[1:2, end+1], p[end], height=Relative(1),)
     return fig
 end
+
+function plot_heatmap_E_t_mean_r(
+    df;
+    f_size = FIG_size,
+)
+    fig = Figure(size=f_size, fontsize=FIG_fontsize, figure_padding=FIG_figure_padding, px_per_unit=1)
+    ax = Axis(fig[1,1], aspect = 1, xlabel=L"E [keV]$$", ylabel = L"t [mm]$$")
+    p = heatmap!(ax, df.E_bin .|> unwrap, df.t_bin .|> unwrap, df.avg_r,)
+    c = Colorbar(fig[1,2], p, label=L"$\bar{r}$ [mm]")
+    c.alignmode = Mixed(right = 35)
+    colgap!(fig.layout, 1, Relative(-0.05))
+
+    resize_to_layout!(fig)
+    return fig
+end
