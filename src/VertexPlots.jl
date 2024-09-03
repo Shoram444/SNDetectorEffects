@@ -268,7 +268,8 @@ function plot_heatmap_E_t_mean_r(
     c = Colorbar(fig[1,2], p, label=L"$\bar{r}$ [mm]")
     c.alignmode = Mixed(right = 35)
     colgap!(fig.layout, 1, Relative(-0.05))
-
+    rowsize!(fig.layout, 1, ax.scene.viewport[].widths[2])
+    
     resize_to_layout!(fig)
     return fig
 end
@@ -285,14 +286,14 @@ function plot_heatmap_theta_phi_mean_r(
     push!.(h2,  df.phi, df.theta, df.r)
     h3 = h2/h1
 
-    fig = Figure(size=f_size, fontsize=FIG_fontsize, figure_padding=5, px_per_unit=6)
-    ax = Axis(fig[1,1], aspect = DataAspect(), xlabel=L"$\varphi$ [${}^{\circ}$]", ylabel = L"$\vartheta$ [${}^{\circ}$]")
+    fig = Figure(size=f_size, fontsize=FIG_fontsize, figure_padding=FIG_figure_padding, px_per_unit=6)
+    ax = Axis(fig[1,1], aspect = DataAspect(), xlabel=L"$\varphi$ [${}^{\circ}$]", ylabel = L"$\vartheta$ [${}^{\circ}$]", tellheight = true)
     p = plot!(ax, h3,colormap=Makie.to_colormap(ColorSchemes.:linear_kbc_5_95_c73_n256 |> reverse))
-    c = Colorbar(fig[1,2], p, label=L"$\bar{r}$ [mm]", tellheight = true, height=Relative(0.85))
+    c = Colorbar(fig[1,2], p, label=L"$\bar{r}$ [mm]", tellheight = true)
     
     ax.xticks = -180:60:180
     colgap!(fig.layout, 1, Relative(0.05))
-
+    rowsize!(fig.layout, 1, ax.scene.viewport[].widths[2])
     resize_to_layout!(fig)
     return fig
 end
