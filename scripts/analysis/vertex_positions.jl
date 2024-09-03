@@ -16,7 +16,7 @@ set_theme!(my_makie_theme())
 
 # DATA PREPARATION
 # data = load_data(CAT_FILE, VERTEX_POS_VARS)
-f = ROOTFile(datadir("sims/Boff/0/CAT.root"))
+f = ROOTFile(datadir("sims/Boff/CAT.root"))
 data = LazyTree(f, "tree", VERTEX_POS_VARS) |> DataFrame
 
 # FakeItTillYouMakeIt events have SE set to 0, we can filter them out now
@@ -63,37 +63,37 @@ describe(df_vertex)
 
 # PLOTS
 f_all_histos = plot_all_histos(df_vertex)
-safesave(plotsdir("foil_effects", "plot_all_histos.png"), f_all_histos)
+safesave(plotsdir("foil_effects", "plot_all_histos.png"), f_all_histos, px_per_unit=6)
 
 f_foil_yz_vertex_map = plot_foil_yz_vertex_map(df_vertex)
-safesave(plotsdir("foil_effects", "plot_foil_yz_vertex_map.png"), f_foil_yz_vertex_map)
+safesave(plotsdir("foil_effects", "plot_foil_yz_vertex_map.png"), f_foil_yz_vertex_map, px_per_unit=6)
 
 f_foil_yz_distance = plot_foil_yz_distance(df_vertex)
-safesave(plotsdir("foil_effects", "plot_foil_yz_distance.png"), f_foil_yz_distance, px_per_unit=5)
+safesave(plotsdir("foil_effects", "plot_foil_yz_distance.png"), f_foil_yz_distance, px_per_unit=5, px_per_unit=6)
 
 f_foil_3D_distance = plot_foil_3D_distance(df_vertex)
-safesave(plotsdir("foil_effects", "plot_foil_3D_distance.png"), f_foil_3D_distance)
+safesave(plotsdir("foil_effects", "plot_foil_3D_distance.png"), f_foil_3D_distance, px_per_unit=6)
 
 f_foil_d_vs_r = plot_foil_d_vs_r(df_vertex)
-safesave(plotsdir("foil_effects", "plot_foil_d_vs_r.png"), f_foil_d_vs_r)
+safesave(plotsdir("foil_effects", "plot_foil_d_vs_r.png"), f_foil_d_vs_r, px_per_unit=6)
 
 f_foil_t_vs_r = plot_foil_t_vs_r(df_vertex)
-safesave(plotsdir("foil_effects", "plot_foil_t_vs_r.png"), f_foil_t_vs_r)
+safesave(plotsdir("foil_effects", "plot_foil_t_vs_r.png"), f_foil_t_vs_r, px_per_unit=6)
 
 f_foil_t_vs_d = plot_foil_t_vs_d(df_vertex)
-safesave(plotsdir("foil_effects", "plot_foil_t_vs_d.png"), f_foil_t_vs_d)
+safesave(plotsdir("foil_effects", "plot_foil_t_vs_d.png"), f_foil_t_vs_d, px_per_unit=6)
 
 
 f_plot_grid_E_t_vertex_sizes = plot_grid_E_t_vertex_sizes(df_vertex; f_size=(600, 400), normed=false)
-safesave(plotsdir("foil_effects", "plot_grid_E_t_vertex_sizes.png"), f_plot_grid_E_t_vertex_sizes)
+safesave(plotsdir("foil_effects", "plot_grid_E_t_vertex_sizes.png"), f_plot_grid_E_t_vertex_sizes, px_per_unit=6)
 
 f_plot_grid_E_t_vertex_sizes_normed = plot_grid_E_t_vertex_sizes(df_vertex; f_size=(600, 400), normed=true)
-safesave(plotsdir("foil_effects", "plot_grid_E_t_vertex_sizes_normed.png"), f_plot_grid_E_t_vertex_sizes_normed)
+safesave(plotsdir("foil_effects", "plot_grid_E_t_vertex_sizes_normed.png"), f_plot_grid_E_t_vertex_sizes_normed, px_per_unit=6)
 
 f_plot_heatmap_E_t_mean_r = plot_heatmap_E_t_mean_r(df_vertex, f_size = (600,400), binning2D = (range(0, 3500 , 30), range(0, 0.25, 30)))
-safesave(plotsdir("foil_effects", "plot_heatmap_E_t_mean_r.png"), f_plot_heatmap_E_t_mean_r)
+safesave(plotsdir("foil_effects", "plot_heatmap_E_t_mean_r.png"), f_plot_heatmap_E_t_mean_r, px_per_unit=6)
 
 f_plot_heatmap_theta_phi_mean_r = plot_heatmap_theta_phi_mean_r(df_vertex)
-safesave(plotsdir("foil_effects", "plot_heatmap_theta_phi_mean_r.png"), f_plot_heatmap_theta_phi_mean_r)
+safesave(plotsdir("foil_effects", "plot_heatmap_theta_phi_mean_r.png"), f_plot_heatmap_theta_phi_mean_r, px_per_unit=6)
 
 
