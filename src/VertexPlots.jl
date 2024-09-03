@@ -285,7 +285,7 @@ function plot_heatmap_theta_phi_mean_r(
     push!.(h2,  df.phi, df.theta, df.r)
     h3 = h2/h1
 
-    fig = Figure(size=f_size, fontsize=FIG_fontsize, figure_padding=5, px_per_unit=1)
+    fig = Figure(size=f_size, fontsize=FIG_fontsize, figure_padding=5, px_per_unit=6)
     ax = Axis(fig[1,1], aspect = DataAspect(), xlabel=L"$\varphi$ [${}^{\circ}$]", ylabel = L"$\vartheta$ [${}^{\circ}$]")
     p = plot!(ax, h3,colormap=Makie.to_colormap(ColorSchemes.:linear_kbc_5_95_c73_n256 |> reverse))
     c = Colorbar(fig[1,2], p, label=L"$\bar{r}$ [mm]", tellheight = true, height=Relative(0.85))
