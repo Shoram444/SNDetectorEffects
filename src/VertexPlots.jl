@@ -252,13 +252,46 @@ end
 function plot_heatmap_E_t_mean_r(
     df;
     f_size = FIG_size,
+    binning2D = (range(0, 3500 , 100), range(0, 0.25, 100))
 )
+    h1 = Hist2D(; binedges=binning2D, counttype=Float64)
+    h2 = Hist2D(; binedges=binning2D, counttype=Float64)
+
+    push!.(h1, df.simuE, df.t)
+    push!.(h2, df.simuE, df.t, df.r)
+
+    h3 = h2/h1
+
     fig = Figure(size=f_size, fontsize=FIG_fontsize, figure_padding=FIG_figure_padding, px_per_unit=1)
     ax = Axis(fig[1,1], aspect = 1, xlabel=L"E [keV]$$", ylabel = L"t [mm]$$")
-    p = heatmap!(ax, df.E_bin .|> unwrap, df.t_bin .|> unwrap, df.avg_r,)
+    p = plot!(ax, h3,)
     c = Colorbar(fig[1,2], p, label=L"$\bar{r}$ [mm]")
     c.alignmode = Mixed(right = 35)
     colgap!(fig.layout, 1, Relative(-0.05))
+
+    resize_to_layout!(fig)
+    return fig
+end
+
+function plot_heatmap_theta_phi_mean_r(
+    df;
+    f_size = FIG_size_w,
+    binning2D = (-180:5:180, -90:5:90)
+)
+    h1 = Hist2D(; binedges=binning2D, counttype=Float64)
+    h2 = Hist2D(; binedges=binning2D, counttype=Float64)
+
+    push!.(h1,  df.phi, df.theta)
+    push!.(h2,  df.phi, df.theta, df.r)
+    h3 = h2/h1
+
+    fig = Figure(size=f_size, fontsize=FIG_fontsize, figure_padding=5, px_per_unit=1)
+    ax = Axis(fig[1,1], aspect = DataAspect(), xlabel=L"$\varphi$ [${}^{\circ}$]", ylabel = L"$\vartheta$ [${}^{\circ}$]")
+    p = plot!(ax, h3,colormap=Makie.to_colormap(ColorSchemes.:linear_kbc_5_95_c73_n256 |> reverse))
+    c = Colorbar(fig[1,2], p, label=L"$\bar{r}$ [mm]", tellheight = true, height=Relative(0.85))
+    
+    ax.xticks = -180:60:180
+    colgap!(fig.layout, 1, Relative(0.05))
 
     resize_to_layout!(fig)
     return fig
