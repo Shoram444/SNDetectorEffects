@@ -34,12 +34,16 @@ export
     plot_foil_yz_vertex_map,
     plot_foil_yz_distance,
     plot_foil_3D_distance,
+    plot_heatmap_t_vs_r,
     plot_foil_d_vs_r,
     plot_foil_t_vs_r,
     plot_foil_t_vs_d,
     plot_grid_E_t_vertex_sizes,
     plot_heatmap_E_t_mean_r,
-    plot_heatmap_theta_phi_mean_r
+    plot_heatmap_theta_phi_mean_r,
+    plot_scatter_t_vs_r,
+    plot_h1d_r_by_t,
+    plot_h1d_r_by_E
 
 include("AnglesPlots.jl")
 export 

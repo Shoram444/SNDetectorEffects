@@ -26,12 +26,20 @@ df_vertex = DataFrame(
     xSD=vcat(data.x1SD, data.x2SD),
     ySD=vcat(data.y1SD, data.y2SD),
     zSD=vcat(data.z1SD, data.z2SD),
-    xSE=vcat(data.x1SE, data.x2SE),
-    pxSD=vcat(data.px1SD, data.px2SD),
-    ySE=vcat(data.y1SE, data.y2SE),
-    pySD=vcat(data.py1SD, data.py2SD),
-    zSE=vcat(data.z1SE, data.z2SE),
+
     pzSD=vcat(data.pz1SD, data.pz2SD),
+    pxSD=vcat(data.px1SD, data.px2SD),
+    pySD=vcat(data.py1SD, data.py2SD),
+
+    xSE=vcat(data.x1SE, data.x2SE),
+    ySE=vcat(data.y1SE, data.y2SE),
+    zSE=vcat(data.z1SE, data.z2SE),
+
+    pzSE=vcat(data.pz1SE, data.pz2SE),
+    pxSE=vcat(data.px1SE, data.px2SE),
+    pySE=vcat(data.py1SE, data.py2SE),
+    
+
     simuE=vcat(data.simuEnergy1, data.simuEnergy2),
     recoE=vcat(data.recoEnergy1, data.recoEnergy2)
 )
@@ -56,6 +64,10 @@ df_vertex = DataFrame(
 
     @rtransform! :theta = -1 * ( acosd( :pzSD / sqrt( :pxSD^2 + :pySD^2 + :pzSD^2 ) ) - 90)
     @rtransform! :phi  = atand( :pySD , :pxSD)
+
+    @rtransform! :theta_SE = -1 * ( acosd( :pzSE / sqrt( :pxSE^2 + :pySE^2 + :pzSE^2 ) ) - 90)
+    @rtransform! :phi_SE  = atand( :pySE , :pxSE)
+
 end
 
 # quick glance at data
@@ -96,4 +108,39 @@ safesave(plotsdir("foil_effects", "plot_heatmap_E_t_mean_r.png"), f_plot_heatmap
 f_plot_heatmap_theta_phi_mean_r = plot_heatmap_theta_phi_mean_r(df_vertex)
 safesave(plotsdir("foil_effects", "plot_heatmap_theta_phi_mean_r.png"), f_plot_heatmap_theta_phi_mean_r, px_per_unit=6)
 
+f_plot_scatter_t_vs_r = plot_scatter_t_vs_r(df_vertex)
+safesave(plotsdir("foil_effects", "plot_scatter_t_vs_r.png"), f_plot_scatter_t_vs_r, px_per_unit=6)
 
+plot_h1d_r_by_t(df_vertex, normed = true, yscale = log10)
+
+plot_h1d_r_by_E(df_vertex)
+
+
+hh = Hist2D(
+    (df_vertex.t, df_vertex.r); 
+    binedges=(0:0.05:0.25, 0:0.01:1)
+) |> normalize
+r_1 = bincounts(hh)[1,:]
+r_2 = bincounts(hh)[2,:]
+r_3 = bincounts(hh)[3,:]
+
+
+@model function fit_chisquare(r)
+    # Prior for the degrees of freedom k
+    k ~ Uniform(0.0, 100.0)
+    
+    # Likelihood for each data point
+    for x in r
+        lpdf = pdf(Chisq(k), x)
+        Turing.@addlogprob! log(lpdf)
+    end
+end
+
+dd = @chain df_vertex begin
+    @rsubset 0.0 < :t < 0.05 
+    @select :r :t
+end
+
+model = fit_chisquare(dd.r)
+
+chain = Turing.sample(model, NUTS(), 1000)

@@ -113,7 +113,7 @@ function plot_foil_d_vs_r(
     return fig
 end
 
-function plot_foil_t_vs_r(
+function plot_heatmap_t_vs_r(
     df,
     binning2D=(range(0, 0.25, 100), range(0, 1.5, 100))
 )
@@ -296,4 +296,151 @@ function plot_heatmap_theta_phi_mean_r(
     rowsize!(fig.layout, 1, ax.scene.viewport[].widths[2])
     resize_to_layout!(fig)
     return fig
+end
+
+
+function plot_scatter_t_vs_r(
+    df,
+    t_start = 0.0,
+    t_stop = 0.25,
+    t_step = 0.25/10,
+)
+
+    dd = @chain df begin
+        @transform :t_bin = cut(:t, t_start:t_step:t_stop, labels = t_start:t_step:t_stop-t_step)
+        
+        @groupby :t_bin
+        @combine begin
+            :r_mean = mean(:r)
+            :r_sigma = std(:r)
+            :r_q90 = quantile(:r, 0.9)
+        end
+        @rtransform :t_bin = :t_bin  |> unwrap 
+        @rtransform :t_bin = :t_bin + (t_step / 2)
+        @select :t_bin :r_mean :r_sigma :r_q90
+    end
+    
+
+    fig = Figure(size=FIG_size, fontsize=FIG_fontsize, figure_padding=12)
+    ax1 = Axis(
+        fig[2, 1],
+        xlabel=L"$t$ (mm)",
+        ylabel=L"$r$ (mm)",
+        aspect=1.1,
+        limits = (t_start, t_stop, 0, 1),
+        xtickalign = 1,
+        ytickalign = 1,
+    )
+
+    s1 = scatter!(ax1, dd.:t_bin, dd.:r_mean, markersize = 12, marker =:circle)
+    s2 = scatter!(ax1, dd.:t_bin, dd.:r_sigma, markersize = 12, marker =:rect)
+    s3 = scatter!(ax1, dd.:t_bin, dd.:r_q90, markersize = 12, marker =:diamond)
+
+    Legend(
+        fig[1,1], 
+        [s1, s2, s3], 
+        [L"$\bar{r}$ ", L"$\sigma_r$ ", L"90% q$$"], 
+        tellwidth = false,
+        patchsize = (10,20), 
+        colgap = 4, 
+        orientation = :horizontal,
+        padding = (6, 6, 0, 0),
+        framewidth = 1.5
+    )
+    rowgap!(fig.layout, 1, Relative(1/50))
+    ax1.xticks= (0:0.05:0.25, ["0.0", "0.05", "0.1", "0.15", "0.2", "0.25"])
+    # resize_to_layout!(fig)
+    return fig
+end
+
+function plot_h1d_r_by_t(
+    df;
+    t_start = 0.0,
+    t_stop = 0.25,
+    t_step = 0.25/5,
+    r_start = 0.0,
+    r_stop = 2.0,
+    r_step = 2.0/100,
+    yscale = identity,
+    normed = true
+)
+    hh = Hist2D(
+        (df.t, df.r); 
+        binedges=(t_start:t_step:t_stop, r_start:r_step:r_stop)
+    )
+
+    if(normed)
+        hh = hh |> normalize
+    end
+
+    bb = bincounts(hh)
+    fig = Figure(size=FIG_size, fontsize=FIG_fontsize, figure_padding=FIG_figure_padding)
+    ax = Axis(
+        fig[1,1], 
+        xlabel = "r", 
+        ylabel ="count", 
+        aspect=AxisAspect(1),
+        yminorticks = IntervalsBetween(6),
+        ytickformat = "{:.0e}" ,
+        yscale =yscale
+    )
+
+    for i=1:size(bb)[1]
+        lines!(
+            ax, 
+            r_start:r_step:r_stop-r_step, 
+            bb[i, :], 
+            label ="t = $(round(i*t_step, digits=3))",
+            linewidth=3,
+            )
+    end
+
+    axislegend(ax)
+    fig
+end
+
+function plot_h1d_r_by_E(
+    df;
+    E_start = 0.0,
+    E_stop = 3500.0,
+    E_step = 3500.0/5.0,
+    r_start = 0.0,
+    r_stop = 2.0,
+    r_step = 2.0/100,
+    yscale = identity,
+    normed = true
+)
+    hh = Hist2D(
+        (df.simuE, df.r); 
+        binedges=(E_start:E_step:E_stop, r_start:r_step:r_stop)
+    ) 
+
+    if(normed)
+        hh = hh |> normalize
+    end
+
+    bb = bincounts(hh)
+    fig = Figure(size=FIG_size, fontsize=FIG_fontsize, figure_padding=FIG_figure_padding)
+    ax = Axis(
+        fig[1,1], 
+        xlabel = "r", 
+        ylabel ="count", 
+        aspect=AxisAspect(1),
+        yminorticks = IntervalsBetween(6),
+        ytickformat = "{:.0e}" ,
+        yscale =yscale
+    )
+
+    for i=1:size(bb)[1]
+        lines!(
+            ax, 
+            r_start:r_step:r_stop-r_step, 
+            bb[i, :], 
+            label ="E = $(round(i*E_step, digits=3))",
+            linewidth=3,
+            )
+    end
+
+    axislegend(ax)
+    fig
 end
