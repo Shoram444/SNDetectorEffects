@@ -57,7 +57,7 @@ function plot_foil_yz_distance(
     h1d = Hist1D(df.r; binedges=binning1D)
 
     p1 = plot!(ax1, h2d, colorscale=log10)
-    p2 = plot!(ax2, h1d)
+    p2 = plot!(ax2, h1d, color = ColorSchemes.tol_vibrant[2])
 
     c = Colorbar(
         fig[1, 2],
@@ -65,7 +65,7 @@ function plot_foil_yz_distance(
         height=Relative(0.73),
     )
     colgap!(fig.layout, 1, 3)
-    # colgap!(fig.layout, 2, -2)
+    colgap!(fig.layout, 2, -8)
     resize_to_layout!(fig)
     return fig
 end

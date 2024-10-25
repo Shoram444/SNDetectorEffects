@@ -111,36 +111,52 @@ safesave(plotsdir("foil_effects", "plot_heatmap_theta_phi_mean_r.png"), f_plot_h
 f_plot_scatter_t_vs_r = plot_scatter_t_vs_r(df_vertex)
 safesave(plotsdir("foil_effects", "plot_scatter_t_vs_r.png"), f_plot_scatter_t_vs_r, px_per_unit=6)
 
-plot_h1d_r_by_t(df_vertex, normed = true, yscale = log10)
+plot_h1d_r_by_t(df_vertex, normed = true)
 
 plot_h1d_r_by_E(df_vertex)
 
-
+t_range = (0.00:0.05:0.25)
+r_range = (0.001:0.01:1)
 hh = Hist2D(
     (df_vertex.t, df_vertex.r); 
-    binedges=(0:0.05:0.25, 0:0.01:1)
+    binedges=(t_range, r_range)
 ) |> normalize
 r_1 = bincounts(hh)[1,:]
 r_2 = bincounts(hh)[2,:]
 r_3 = bincounts(hh)[3,:]
 
+using Optim
 
-@model function fit_chisquare(r)
-    # Prior for the degrees of freedom k
-    k ~ Uniform(0.0, 100.0)
-    
-    # Likelihood for each data point
-    for x in r
-        lpdf = pdf(Chisq(k), x)
-        Turing.@addlogprob! log(lpdf)
-    end
+function fit_func(x, p)
+    k, α = p
+    1/(2^(k/2) * gamma(k/2)) * (x*α)^(k/2 - 1) * exp(-(x*α)/2)
 end
 
-dd = @chain df_vertex begin
-    @rsubset 0.0 < :t < 0.05 
-    @select :r :t
+x = 0.1:0.1:10
+
+
+plot(x,y)
+
+initial_params = [1.0, 1.0, 1.0]
+lower_bounds = [0.001, 0.001, 0.001]
+
+function neg_log_likelihood(params, x, y)
+    k, α, σ = params
+    y_pred = map(x->fit_func(x, [k, α]), x)
+
+    # Log likelihood is defined as normally distributed error about prediction
+    return sum(@. log(σ * √(2 * π)) + (y .- y_pred).^2 / (2 * σ^2))
 end
 
-model = fit_chisquare(dd.r)
+result = optimize(params -> neg_log_likelihood(params, x, y), lower_bounds, Inf, initial_params, Fminbox(BFGS()))
+fitted_k, fitted_α = Optim.minimizer(result)
 
-chain = Turing.sample(model, NUTS(), 1000)
+
+fitted_k, fitted_α, fitted_σ = fit_chi_square_mle(midpoints(r_range), r_1)
+y_fit = map(x->fit_func(x, [fitted_k,fitted_α]), midpoints(r_range))
+
+f,a,p = plot(midpoints(r_range), r_1)
+lines!(a, midpoints(r_range), y_fit)
+f
+
+plot(midpoints(r_range), y_fit)

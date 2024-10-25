@@ -50,4 +50,8 @@ export
     plot_angles_1D,
     plot_angles_theta_vs_phiSE
 
+include("FitFunctions.jl")
+export 
+    fit_chi_square_mle
+
 end
