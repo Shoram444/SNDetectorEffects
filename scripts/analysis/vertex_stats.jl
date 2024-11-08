@@ -10,13 +10,13 @@ using Revise
 
 push!(LOAD_PATH, srcdir())
 using DetectorEffects
-using FHist, UnROOT, DataFramesMeta, CairoMakie, StatsBase, CategoricalArrays
+using FHist, UnROOT, DataFramesMeta, CairoMakie, StatsBase, CategoricalArrays, CSV, PrettyTables
 Revise.track(DetectorEffects)
 set_theme!(my_makie_theme())
 
 # DATA PREPARATION
 # data = load_data(CAT_FILE, VERTEX_POS_VARS)
-f = ROOTFile(datadir("sims/Boff/CAT.root"))
+f = ROOTFile(datadir("sims/Boff/0/CAT.root"))
 data = LazyTree(f, "tree", VERTEX_POS_VARS) |> DataFrame
 
 # FakeItTillYouMakeIt events have SE set to 0, we can filter them out now
@@ -149,15 +149,17 @@ function get_vertex_stats_df(
             @subset E .<= :simuE .< E + E_step
         end
 
-        v_sE = get_vertex_stats(dE;t_range,binning2D,binning1D,E_range)
+        v_sE = get_vertex_stats(dE;t_range=t_range,binning2D=binning2D,binning1D=binning1D,E_range=(E, E+E_step))
         push!(vertex_stats, v_sE)
 
         dt = @chain df begin
             @subset t .<= :t .< t + t_step
         end
 
-        v_st = get_vertex_stats(dt;t_range,binning2D,binning1D,E_range)
+        v_st = get_vertex_stats(dt;t_range=(t,t+t_step),binning2D=binning2D,binning1D=binning1D,E_range=E_range)
         push!(vertex_stats, v_st)
+
+        @show E
     end
 
     df_stats = DataFrame(
@@ -188,6 +190,5 @@ v_stats = get_vertex_stats_df(
     E_range=(0.0, 3500.0)
 )
 
-using CSV
-
-CSV.write(plotsdir("vertex_stats/vertex_stats_CAT_full.csv"), v_stats)
+pretty_table(v_stats)
+safesave(CSV.write(plotsdir("vertex_stats/vertex_stats_CAT.csv"), v_stats))
