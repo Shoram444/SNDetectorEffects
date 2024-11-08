@@ -16,7 +16,7 @@ set_theme!(my_makie_theme())
 
 # DATA PREPARATION
 # data = load_data(CAT_FILE, VERTEX_POS_VARS)
-f = ROOTFile(datadir("sims/Boff/0/CAT.root"))
+f = ROOTFile(datadir("sims/Boff/CAT.root"))
 data = LazyTree(f, "tree", VERTEX_POS_VARS) |> DataFrame
 
 # FakeItTillYouMakeIt events have SE set to 0, we can filter them out now
@@ -81,7 +81,7 @@ f_foil_yz_vertex_map = plot_foil_yz_vertex_map(df_vertex)
 safesave(plotsdir("foil_effects", "plot_foil_yz_vertex_map.png"), f_foil_yz_vertex_map, px_per_unit=6)
 
 f_foil_yz_distance = plot_foil_yz_distance(df_vertex)
-safesave(plotsdir("foil_effects", "plot_foil_yz_distance.png"), f_foil_yz_distance, px_per_unit=5, px_per_unit=6)
+safesave(plotsdir("foil_effects", "plot_foil_yz_distance.png"), f_foil_yz_distance, px_per_unit=6)
 
 f_foil_3D_distance = plot_foil_3D_distance(df_vertex)
 safesave(plotsdir("foil_effects", "plot_foil_3D_distance.png"), f_foil_3D_distance, px_per_unit=6)
@@ -111,31 +111,29 @@ safesave(plotsdir("foil_effects", "plot_heatmap_theta_phi_mean_r.png"), f_plot_h
 f_plot_scatter_t_vs_r = plot_scatter_t_vs_r(df_vertex)
 safesave(plotsdir("foil_effects", "plot_scatter_t_vs_r.png"), f_plot_scatter_t_vs_r, px_per_unit=6)
 
-plot_h1d_r_by_t(df_vertex, normed = true)
+plot_h1d_r_by_t(df_vertex, normed = true, )
 
 plot_h1d_r_by_E(df_vertex)
 
 t_range = (0.00:0.05:0.25)
-r_range = (0.001:0.01:1)
+r_range = (0.001:0.05:1)
 hh = Hist2D(
     (df_vertex.t, df_vertex.r); 
     binedges=(t_range, r_range)
-) |> normalize
+) 
 r_1 = bincounts(hh)[1,:]
 r_2 = bincounts(hh)[2,:]
 r_3 = bincounts(hh)[3,:]
 
-using Optim
+h = Hist1D(; bincounts = r_2, binedges = r_range) 
+r_2 = bincounts(h)
+
+using Optim, SpecialFunctions
 
 function fit_func(x, p)
-    k, α = p
-    1/(2^(k/2) * gamma(k/2)) * (x*α)^(k/2 - 1) * exp(-(x*α)/2)
+    k, α, β = p
+    1/(2^(k/2) * gamma(k/2)) * (x*α)^(k/2 - 1) * exp(-(x*α)/2) * β
 end
-
-x = 0.1:0.1:10
-
-
-plot(x,y)
 
 initial_params = [1.0, 1.0, 1.0]
 lower_bounds = [0.001, 0.001, 0.001]
@@ -148,15 +146,23 @@ function neg_log_likelihood(params, x, y)
     return sum(@. log(σ * √(2 * π)) + (y .- y_pred).^2 / (2 * σ^2))
 end
 
-result = optimize(params -> neg_log_likelihood(params, x, y), lower_bounds, Inf, initial_params, Fminbox(BFGS()))
-fitted_k, fitted_α = Optim.minimizer(result)
-
-
-fitted_k, fitted_α, fitted_σ = fit_chi_square_mle(midpoints(r_range), r_1)
+fitted_k, fitted_α, fitted_σ = fit_chi_square_mle(midpoints(r_range), r_2)
 y_fit = map(x->fit_func(x, [fitted_k,fitted_α]), midpoints(r_range))
 
-f,a,p = plot(midpoints(r_range), r_1)
+f,a,p = plot(midpoints(r_range), r_2)
 lines!(a, midpoints(r_range), y_fit)
 f
 
 plot(midpoints(r_range), y_fit)
+
+
+f_foil_yz_distance, h1d_yz_distance, h2d_yz_distance = plot_foil_yz_distance(df_vertex)
+
+
+h1d_yz_distance |> mean
+h1d_yz_distance |> std
+quantile(h1d_yz_distance, 0.627)
+
+h2d_yz_distance |> std
+
+describe(df_vertex)

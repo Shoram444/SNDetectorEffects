@@ -37,7 +37,7 @@ function plot_foil_yz_distance(
         @subset t_range[1] .<= :t .< t_range[2]
         @subset E_range[1] .<= :simuE .< E_range[2]
     end
-    fig = Figure(size=FIG_size_w, fontsize=FIG_fontsize, figure_padding=FIG_figure_padding, px_per_unit=1)
+    fig = Figure(size=FIG_size_w, fontsize=FIG_fontsize, figure_padding=2*FIG_figure_padding, px_per_unit=5)
     # Label(fig[0, 1:3], L"Relative vertex separation in y-z plane \\ Simulated Decay - Simulated Escape $$")
     ax1 = Axis(
         fig[1, 1],
@@ -49,7 +49,7 @@ function plot_foil_yz_distance(
         fig[1, 3],
         xlabel=L"$r$ [mm]",
         ylabel=L"count $$",
-        aspect=1,
+        # aspect=1,
         # limits=(nothing, nothing,0,5e6)
     )
 
@@ -62,12 +62,12 @@ function plot_foil_yz_distance(
     c = Colorbar(
         fig[1, 2],
         p1,
-        height=Relative(0.73),
+        height=Relative(1),
     )
-    colgap!(fig.layout, 1, 3)
-    colgap!(fig.layout, 2, -8)
+    colgap!(fig.layout, 2, Relative(0.2))
+    colgap!(fig.layout, 1, Relative(-0.04))
     resize_to_layout!(fig)
-    return fig
+    return fig, h1d, h2d
 end
 
 function plot_foil_3D_distance(
