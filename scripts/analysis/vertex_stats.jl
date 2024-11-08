@@ -70,3 +70,124 @@ df_vertex = DataFrame(
 
 end
 
+p_foil_yz_distance, h1_foil_yz_distance, h2_foil_yz_distance = plot_foil_yz_distance(
+    df_vertex;
+    t_range=(0.0, 0.25),
+    binning2D=(range(-4, 4, 50), range(-4, 4, 50)),
+    binning1D=range(0, 2, 50),
+    E_range=(0.0, 3500.0),
+)
+
+mutable struct Vertex_stats
+    E_min
+    E_max
+    t_min
+    t_max
+    mean_2d
+    max_2d
+    min_2d
+    mean_1d
+    std_1d
+    q50_1d
+    q90_1d
+    q99_1d
+    sigma_1d
+    sigma2_1d
+    sigma3_1d
+end
+    
+function get_vertex_stats(df;
+    t_range=(0.0, 0.25),
+    binning2D=(range(-4, 4, 50), range(-4, 4, 50)),
+    binning1D=range(0, 2, 50),
+    E_range=(0.0, 3500.0)
+    )
+
+    _, h1, h2 = plot_foil_yz_distance(df_vertex; t_range, binning2D, binning1D, E_range)
+    
+    E_min = E_range[1]
+    E_max = E_range[2]
+    t_min = t_range[1]
+    t_max = t_range[2]
+    mean_2d = h2 |> mean
+    max_2d = h2 |> bincounts |> maximum
+    min_2d = h2 |> bincounts |> minimum
+    mean_1d = h1 |> mean
+    std_1d = h1 |> std
+    q50_1d = quantile(h1, 0.5)
+    q90_1d = quantile(h1, 0.9)
+    q99_1d = quantile(h1, 0.99)
+    sigma_1d = quantile(h1, 0.682689492137086)
+    sigma2_1d = quantile(h1, 0.954499736103642)
+    sigma3_1d = quantile(h1, 0.997300203936740)
+
+    return Vertex_stats(
+        E_min, E_max, t_min, t_max, 
+        mean_2d, max_2d, min_2d, 
+        mean_1d, std_1d, q50_1d, q90_1d, q99_1d, sigma_1d, sigma2_1d, sigma3_1d
+        )
+end
+
+get_vertex_stats(
+    df_vertex;
+    t_range=(0.0, 0.25),
+    binning2D=(range(-4, 4, 50), range(-4, 4, 50)),
+    binning1D=range(0, 2, 50),
+    E_range=(0.0, 3500.0)
+)
+
+function get_vertex_stats_df(
+    df; E_vals = [500, 1500, 2500], E_step = 1000,t_vals = [0.0, 0.083, 2*0.083], t_step = 0.083,
+    t_range=(0.0, 0.25), binning2D=(range(-4, 4, 50), range(-4, 4, 50)), binning1D=range(0, 2, 50),
+    E_range=(0.0, 3500.0)
+    )
+
+    vertex_stats = []
+
+    for (E, t) in zip(E_vals, t_vals)
+        dE = @chain df begin
+            @subset E .<= :simuE .< E + E_step
+        end
+
+        v_sE = get_vertex_stats(dE;t_range,binning2D,binning1D,E_range)
+        push!(vertex_stats, v_sE)
+
+        dt = @chain df begin
+            @subset t .<= :t .< t + t_step
+        end
+
+        v_st = get_vertex_stats(dt;t_range,binning2D,binning1D,E_range)
+        push!(vertex_stats, v_st)
+    end
+
+    df_stats = DataFrame(
+        E_min = [v.E_min for v in vertex_stats],
+        E_max = [v.E_max for v in vertex_stats],
+        t_min = [v.t_min for v in vertex_stats],
+        t_max = [v.t_max for v in vertex_stats],
+        mean_2d = [v.mean_2d for v in vertex_stats],
+        max_2d = [v.max_2d for v in vertex_stats],
+        min_2d = [v.min_2d for v in vertex_stats],
+        mean_1d = [v.mean_1d for v in vertex_stats],
+        std_1d = [v.std_1d for v in vertex_stats],
+        q50_1d = [v.q50_1d for v in vertex_stats],
+        q90_1d = [v.q90_1d for v in vertex_stats],
+        q99_1d = [v.q99_1d for v in vertex_stats],
+        sigma_1d = [v.sigma_1d for v in vertex_stats],
+        sigma2_1d = [v.sigma2_1d for v in vertex_stats],
+        sigma3_1d = [v.sigma3_1d for v in vertex_stats]
+    )
+
+
+    return df_stats
+end
+
+v_stats = get_vertex_stats_df(
+    df_vertex; E_vals = [500, 1500, 2500], E_step = 1000,t_vals = [0.0, 0.083, 2*0.083], t_step = 0.083,
+    t_range=(0.0, 0.25), binning2D=(range(-4, 4, 50), range(-4, 4, 50)), binning1D=range(0, 2, 50),
+    E_range=(0.0, 3500.0)
+)
+
+using CSV
+
+CSV.write(plotsdir("vertex_stats/vertex_stats_CAT_full.csv"), v_stats)
