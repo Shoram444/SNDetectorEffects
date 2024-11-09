@@ -2,6 +2,8 @@ name = "SNDetectorEffects"
 authors = ["mpetro"]
 
 [deps]
+AbbreviatedStackTraces = "ac637c84-cc71-43bf-9c33-c1b4316be3d4"
+CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
 CategoricalArrays = "324d7699-5711-5eae-9e2f-1d82baa6b597"
 ColorSchemes = "35d6a980-a343-548e-a6ea-1d62b119f2f4"
