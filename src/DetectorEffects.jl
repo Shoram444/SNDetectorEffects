@@ -54,4 +54,10 @@ include("FitFunctions.jl")
 export 
     fit_chi_square_mle
 
+include("VertexStats.jl")
+export 
+    Vertex_stats,
+    get_vertex_stats,
+    get_vertex_stats_df
+
 end
