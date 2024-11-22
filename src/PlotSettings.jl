@@ -1,12 +1,12 @@
-const FIG_pt_per_unit = 1
-const FIG_width = 9          # cm
-const FIG_height = 9          # cm
-const dpi = 72/2.54           # dpi/cm
-const px_per_unit = 21.1666   # equivalent of final 600dpi
-const FIG_size=(FIG_width*dpi, FIG_height*dpi) 
-const FIG_size_w=(14*dpi*2, FIG_height*dpi) 
-const FIG_fontsize=12
-const FIG_figure_padding=5
+FIG_pt_per_unit = 1
+FIG_width = 9          # cm
+FIG_height = 9          # cm
+dpi = 72/2.54           # dpi/cm
+px_per_unit = 21.1666   # equivalent of final 600dpi
+FIG_size=(FIG_width*dpi, FIG_height*dpi) 
+FIG_size_w=(FIG_width*dpi*2, FIG_height*dpi) 
+FIG_fontsize=12
+FIG_figure_padding=5
 
 function plot_all_histos(df)
     # Create a grid layout for the plots

@@ -3,7 +3,7 @@
 # SLURM options:
 
 #SBATCH --job-name=SNDetectorEffects        	 # Job name
-#SBATCH --partition=flash                  # Partition choice (most generally we work with htc, but for quick debugging you can use
+#SBATCH --partition=htc                  # Partition choice (most generally we work with htc, but for quick debugging you can use
 										 #					 #SBATCH --partition=flash. This avoids waiting times, but is limited to 1hr)
 #SBATCH --mem=64G                     	 # RAM
 #SBATCH --licenses=sps                   # When working on sps, must declare license!!

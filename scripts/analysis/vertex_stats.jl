@@ -61,20 +61,39 @@ Threads.@threads for (i, event) in enumerate(data)
 end
 
 
-p_foil_yz_distance, h1_foil_yz_distance, h2_foil_yz_distance = plot_foil_yz_distance(
+# v_stats = get_vertex_stats_df(
+#     dy, dz, E, t, r;
+#     E_vals = [500, 1500, 2500], E_step = 1000,t_vals = [0.0, 0.083, 2*0.083], t_step = 0.083,
+#     t_range=(0.0, 0.25), binning2D=(range(-4, 4, 50), range(-4, 4, 50)), binning1D=range(0, 2, 50),
+#     E_range=(0.0, 3500.0)
+# )
+
+# pretty_table(v_stats)
+# safesave(CSV.write(plotsdir("vertex_stats/vertex_stats_CAT_full_array.csv"), v_stats))
+
+FIG_size_w1=(9*28*2, 9*28)
+
+fig_grid_E_t_vertex_sizes = plot_grid_E_t_vertex_sizes(
     dy, dz, E, t, r;
-    t_range=(0.0, 0.25),
-    binning2D=(range(-4, 4, 50), range(-4, 4, 50)),
+    E_vals = [500, 1500, 2500],
+    E_step = 1000,
+    t_vals = [0.0, 0.083, 2*0.083],
+    t_step = 0.083,
+    f_size = FIG_size_w1,
+    normed = true,
+    binning2D = (range(-5, 5, 50), range(-5, 5, 50))
+)
+safesave(plotsdir("foil_effects/plot_grid_E_t_vertex_sizes.png"), fig_grid_E_t_vertex_sizes)
+
+
+fig_E_t_subsets_r = plot_E_t_subsets_r(
+    dy, dz, E, t, r;
+    E_vals = [500, 1500, 2500],
+    E_step = 1000,
+    t_vals = [0.0, 0.083, 2*0.083],
+    t_step = 0.083,
+    f_size = FIG_size_w,
+    normed = true,
     binning1D=range(0, 2, 50),
-    E_range=(0.0, 3500.0),
 )
-
-v_stats = get_vertex_stats_df(
-    dy, dz, E, t, r;
-    E_vals = [500, 1500, 2500], E_step = 1000,t_vals = [0.0, 0.083, 2*0.083], t_step = 0.083,
-    t_range=(0.0, 0.25), binning2D=(range(-4, 4, 50), range(-4, 4, 50)), binning1D=range(0, 2, 50),
-    E_range=(0.0, 3500.0)
-)
-
-pretty_table(v_stats)
-safesave(CSV.write(plotsdir("vertex_stats/vertex_stats_CAT_full_array.csv"), v_stats))
+safesave(plotsdir("foil_effects/plot_E_t_subsets_r.png"), fig_E_t_subsets_r)

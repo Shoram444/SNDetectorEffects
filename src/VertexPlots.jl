@@ -126,56 +126,6 @@ function plot_foil_yz_distance(
     return fig, h1d, h2d
 end
 
-function plot_foil_yz_distance(
-    dy, dz, E, t, r;
-    t_range=(0.0, 0.25),
-    binning2D=(range(-4, 4, 50), range(-4, 4, 50)),
-    binning1D=range(0, 2, 50),
-    E_range=(0.0, 3500.0),
-)
-    indexes_to_keep = Int[]
-    Threads.@threads for i in eachindex(E)
-        if( 
-            (t_range[1] <= t[i] <= t_range[2]) &&
-            (E_range[1] <= E[i] <= E_range[2])
-          )
-          push!(indexes_to_keep, i)
-        end
-    end
-
-    fig = Figure(size=FIG_size_w, fontsize=FIG_fontsize, figure_padding=2*FIG_figure_padding, px_per_unit=5)
-    # Label(fig[0, 1:3], L"Relative vertex separation in y-z plane \\ Simulated Decay - Simulated Escape $$")
-    ax1 = Axis(
-        fig[1, 1],
-        xlabel=L"$\Delta y$ [mm]",
-        ylabel=L"$\Delta z$ [mm]",
-        aspect=1,
-    )
-    ax2 = Axis(
-        fig[1, 3],
-        xlabel=L"$r$ [mm]",
-        ylabel=L"count $$",
-        # aspect=1,
-        # limits=(nothing, nothing,0,5e6)
-    )
-
-    h2d = Hist2D((view(dy, indexes_to_keep), view(dz, indexes_to_keep)); binedges=binning2D)
-    h1d = Hist1D(view(r, indexes_to_keep); binedges=binning1D)
-
-    p1 = plot!(ax1, h2d, colorscale=log10)
-    p2 = plot!(ax2, h1d, color = ColorSchemes.tol_vibrant[2])
-
-    c = Colorbar(
-        fig[1, 2],
-        p1,
-        height=Relative(1),
-    )
-    colgap!(fig.layout, 2, Relative(0.2))
-    colgap!(fig.layout, 1, Relative(-0.04))
-    resize_to_layout!(fig)
-    return fig, h1d, h2d
-end
-
 
 function plot_foil_3D_distance(
     df,
@@ -353,6 +303,207 @@ function plot_grid_E_t_vertex_sizes(
         push!(p, p1)
     end
     Colorbar(fig[1:2, end+1], p[end], height=Relative(1),)
+    return fig
+end
+
+function plot_grid_E_t_vertex_sizes(
+    dy, dz, E, t, r;
+    E_vals = [500, 1500, 2500],
+    E_step = 1000,
+    t_vals = [0.0, 0.083, 2*0.083],
+    t_step = 0.083,
+    f_size = FIG_size_w,
+    normed = false,
+    binning2D = (range(-5, 5, 50), range(-5, 5, 50))
+)
+    hE = []
+    ht = []
+    for (_E, _t) in zip(E_vals, t_vals)
+        indexes_to_keep_E = Int[]
+        Threads.@threads for i in eachindex(E)
+            if( 
+                (_E <= E[i] <= _E+E_step)
+              )
+              push!(indexes_to_keep_E, i)
+            end
+        end
+        _hE = Hist2D((view(dy, indexes_to_keep_E), view(dz, indexes_to_keep_E)); binedges=binning2D)
+
+        indexes_to_keep_t = Int[]
+        Threads.@threads for i in eachindex(t)
+            if( 
+                (_t <= t[i] <= _t+t_step)
+              )
+              push!(indexes_to_keep_t, i)
+            end
+        end
+        _ht = Hist2D((view(dy, indexes_to_keep_t), view(dz, indexes_to_keep_t)); binedges=binning2D)
+
+        if(normed)
+            _hE = _hE |> normalize
+            _ht = _ht |> normalize
+        end
+        push!(hE, _hE)
+        push!(ht, _ht)
+    end
+
+    largest_bin = vcat(
+        hE .|> bincounts .|> maximum, 
+        ht .|> bincounts .|> maximum
+        ) |> maximum
+
+    min1(A) = minimum(x-> ifelse(x==0, 1e10, x), A) # consider only non-zero bins
+    smallest_bin = vcat(
+        hE .|> bincounts .|> min1, 
+        ht .|> bincounts .|> min1
+        ) |> minimum
+    @show c_range = (smallest_bin, largest_bin)
+
+    fig = Figure(size=f_size, fontsize=FIG_fontsize, figure_padding=FIG_figure_padding, px_per_unit=6)
+    p = []
+    for (i, e) in enumerate(E_vals)
+        if(i==1)
+            ax = Axis(
+                fig[1, i],
+                ylabel=L"$\Delta z$ [mm]",
+                title=L"$E_{i} \in (%$e, %$(e+E_step))$ keV",
+                aspect=1,
+            )
+        else
+            ax = Axis(
+                fig[1, i],
+                title=L"$E_{i} \in (%$e, %$(e+E_step))$ keV",
+                aspect=1,
+            )
+            hideydecorations!(ax, grid=false, minorgrid=false)
+        end
+
+        hidexdecorations!(ax, grid=false, minorgrid=false)
+
+        p1 = plot!(ax, hE[i], colorscale=log10, colorrange=c_range)
+        push!(p, p1)
+    end
+    for (i, tt) in enumerate(t_vals)
+        if(i == 1)
+            ax = Axis(
+                fig[2, i],
+                xlabel=L"$\Delta y$ [mm]",
+                ylabel=L"$\Delta z$ [mm]",
+                title=L"$t \in (%$tt, %$(round(tt+t_step, sigdigits=2)))$ mm",
+                aspect=1,
+            )
+        else
+            ax = Axis(
+                fig[2, i],
+                xlabel=L"$\Delta y$ [mm]",
+                title=L"$t \in (%$tt, %$(round(tt+t_step, sigdigits=2)))$ mm",
+                aspect=1,
+            )
+            hideydecorations!(ax, grid=false, minorgrid=false)
+        end
+
+        p1 = plot!(ax, ht[i], colorscale=log10, colorrange=c_range)
+
+        push!(p, p1)
+    end
+    Colorbar(fig[1:2, end+1], p[end], height=Relative(1),)
+    return fig
+end
+
+function plot_E_t_subsets_r(
+    dy, dz, E, t, r;
+    E_vals = [500, 1500, 2500],
+    E_step = 1000,
+    t_vals = [0.0, 0.083, 2*0.083],
+    t_step = 0.083,
+    f_size = FIG_size,
+    normed = true,
+    binning1D=range(0, 2, 50),
+)
+    hE = []
+    ht = []
+    for (_E, _t) in zip(E_vals, t_vals)
+        indexes_to_keep_E = Int[]
+        Threads.@threads for i in eachindex(E)
+            if( 
+                (_E <= E[i] <= _E+E_step)
+              )
+              push!(indexes_to_keep_E, i)
+            end
+        end
+        _hE = Hist1D(view(r, indexes_to_keep_E); binedges=binning1D)
+
+        indexes_to_keep_t = Int[]
+        Threads.@threads for i in eachindex(t)
+            if( 
+                (_t <= t[i] <= _t+t_step)
+              )
+              push!(indexes_to_keep_t, i)
+            end
+        end
+        _ht = Hist1D(view(r, indexes_to_keep_t); binedges=binning1D)
+
+        if(normed)
+            _hE = _hE |> normalize
+            _ht = _ht |> normalize
+        end
+        push!(hE, _hE)
+        push!(ht, _ht)
+    end
+
+    # largest_bin = vcat(
+    #     hE |> bincounts |> maximum, 
+    #     ht |> bincounts |> maximum
+    #     ) |> maximum
+
+    # min1(A) = minimum(x-> ifelse(x==0, 1e10, x), A) # consider only non-zero bins
+    # smallest_bin = vcat(
+    #     hE |> bincounts |> min1, 
+    #     ht |> bincounts |> min1
+    #     ) |> minimum
+    # @show c_range = (smallest_bin, largest_bin)
+
+    fig = Figure(size=f_size, fontsize=FIG_fontsize, figure_padding=FIG_figure_padding, px_per_unit=6)
+    ax1 = Axis(
+            fig[1, 1],
+            ylabel=L"count $$",
+            xlabel=L"r [mm] $$",
+            aspect = 1,
+            title = L"Energy subsets $$"
+        )
+    ax2 = Axis(
+            fig[1, 2],
+            ylabel=L"count $$",
+            xlabel=L"r [mm] $$",
+            aspect = 1,
+            yaxisposition = :right,
+            title = L"Depth subsets $$"
+        )
+
+    colors = ColorSchemes.tol_vibrant
+    
+    for (_he, _ht, _E, _t, i ) in zip(hE, ht, E_vals, t_vals, [1,2,3])
+        stairs!(
+            ax1, 
+            midpoints(binning1D), 
+            bincounts(_he), 
+            label = L"$E \in (%$_E, %$(_E+E_step))$ keV", 
+            color = colors[i]
+        )
+        stairs!(
+            ax2, 
+            midpoints(binning1D), 
+            bincounts(_ht), 
+            label = L"$t \in (%$_t, %$(_t+t_step))$ mm", 
+            color = colors[4+i]
+        )
+    end
+    ylims!(ax1, 0, 7)
+    ylims!(ax2, 0, 7)
+    
+    axislegend(ax1, labelsize = 12, padding = 3)
+    axislegend(ax2, labelsize = 12, padding = 3)
+
     return fig
 end
 

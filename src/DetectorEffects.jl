@@ -43,7 +43,8 @@ export
     plot_heatmap_theta_phi_mean_r,
     plot_scatter_t_vs_r,
     plot_h1d_r_by_t,
-    plot_h1d_r_by_E
+    plot_h1d_r_by_E,
+    plot_E_t_subsets_r
 
 include("AnglesPlots.jl")
 export 
