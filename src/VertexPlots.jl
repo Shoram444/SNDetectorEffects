@@ -31,12 +31,68 @@ function plot_foil_yz_distance(
     binning2D=(range(-4, 4, 50), range(-4, 4, 50)),
     binning1D=range(0, 2, 50),
     E_range=(0.0, 3500.0),
+    f_size=(800, 270)
 )
 
     df = @chain df begin
         @subset t_range[1] .<= :t .< t_range[2]
         @subset E_range[1] .<= :simuE .< E_range[2]
     end
+    fig = Figure(size=f_size, fontsize=20, figure_padding=15, px_per_unit=5)
+    # Label(fig[0, 1:3], L"Relative vertex separation in y-z plane \\ Simulated Decay - Simulated Escape $$")
+    ax1 = Axis(
+        fig[1, 1],
+        xlabel=L"$\Delta y$ [mm]",
+        ylabel=L"$\Delta z$ [mm]",
+        aspect=1,
+        xticklabelsize = 18,
+        yticklabelsize = 18
+
+    )
+    ax2 = Axis(
+        fig[1, 3],
+        xlabel=L"$r$ [mm]",
+        ylabel=L"count $$",
+        xticklabelsize = 18,
+        yticklabelsize = 18
+        # aspect=1,
+        # limits=(nothing, nothing,0,5e6)
+    )
+
+    h2d = Hist2D((df.dy, df.dz); binedges=binning2D)
+    h1d = Hist1D(df.r; binedges=binning1D)
+
+    p1 = plot!(ax1, h2d, colorscale=log10)
+    p2 = plot!(ax2, h1d, color = ColorSchemes.tol_vibrant[2])
+
+    c = Colorbar(
+        fig[1, 2],
+        p1,
+        height=Relative(1),
+    )
+    colgap!(fig.layout, 2, Relative(0.03))
+    colgap!(fig.layout, 1, Relative(-0.08))
+    resize_to_layout!(fig)
+    return fig, h1d, h2d
+end
+
+function plot_foil_yz_distance(
+    dy, dz, E, t, r;
+    t_range=(0.0, 0.25),
+    binning2D=(range(-4, 4, 50), range(-4, 4, 50)),
+    binning1D=range(0, 2, 50),
+    E_range=(0.0, 3500.0),
+)
+    indexes_to_keep = Int[]
+    Threads.@threads for i in eachindex(E)
+        if( 
+            (t_range[1] <= t[i] <= t_range[2]) &&
+            (E_range[1] <= E[i] <= E_range[2])
+          )
+          push!(indexes_to_keep, i)
+        end
+    end
+
     fig = Figure(size=FIG_size_w, fontsize=FIG_fontsize, figure_padding=2*FIG_figure_padding, px_per_unit=5)
     # Label(fig[0, 1:3], L"Relative vertex separation in y-z plane \\ Simulated Decay - Simulated Escape $$")
     ax1 = Axis(
@@ -53,8 +109,8 @@ function plot_foil_yz_distance(
         # limits=(nothing, nothing,0,5e6)
     )
 
-    h2d = Hist2D((df.dy, df.dz); binedges=binning2D)
-    h1d = Hist1D(df.r; binedges=binning1D)
+    h2d = Hist2D((view(dy, indexes_to_keep), view(dz, indexes_to_keep)); binedges=binning2D)
+    h1d = Hist1D(view(r, indexes_to_keep); binedges=binning1D)
 
     p1 = plot!(ax1, h2d, colorscale=log10)
     p2 = plot!(ax2, h1d, color = ColorSchemes.tol_vibrant[2])

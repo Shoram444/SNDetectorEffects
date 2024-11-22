@@ -16,7 +16,7 @@ set_theme!(my_makie_theme())
 
 # DATA PREPARATION
 # data = load_data(CAT_FILE, VERTEX_POS_VARS)
-f = ROOTFile(datadir("sims/Boff/TIT.root"))
+f = ROOTFile(datadir("sims/Boff/CAT.root"))
 data = LazyTree(f, "tree", VERTEX_POS_VARS) 
 
 E = Float64[]
@@ -77,4 +77,4 @@ v_stats = get_vertex_stats_df(
 )
 
 pretty_table(v_stats)
-safesave(CSV.write(plotsdir("vertex_stats/vertex_stats_TIT_full_array.csv"), v_stats))
+safesave(CSV.write(plotsdir("vertex_stats/vertex_stats_CAT_full_array.csv"), v_stats))

@@ -80,7 +80,7 @@ safesave(plotsdir("foil_effects", "plot_all_histos.png"), f_all_histos, px_per_u
 f_foil_yz_vertex_map = plot_foil_yz_vertex_map(df_vertex)
 safesave(plotsdir("foil_effects", "plot_foil_yz_vertex_map.png"), f_foil_yz_vertex_map, px_per_unit=6)
 
-f_foil_yz_distance = plot_foil_yz_distance(df_vertex)
+f_foil_yz_distance = plot_foil_yz_distance(df_vertex)[1]
 safesave(plotsdir("foil_effects", "plot_foil_yz_distance.png"), f_foil_yz_distance, px_per_unit=6)
 
 f_foil_3D_distance = plot_foil_3D_distance(df_vertex)
