@@ -77,11 +77,12 @@ function plot_foil_yz_distance(
 end
 
 function plot_foil_yz_distance(
-    dy, dz, E, t, r;
-    t_range=(0.0, 0.25),
-    binning2D=(range(-4, 4, 50), range(-4, 4, 50)),
+    dy::Vector{<:Real}, dz::Vector{<:Real}, E::Vector{<:Real}, t::Vector{<:Real}, r::Vector{<:Real};
+    t_range::Tuple{<:Real, <:Real}=(0.0, 0.25),
+    binning2D=(range(-5, 5, 50), range(-5, 5, 50)),
     binning1D=range(0, 2, 50),
     E_range=(0.0, 3500.0),
+    f_size = FIG_size_w
 )
     indexes_to_keep = Int[]
     Threads.@threads for i in eachindex(E)
@@ -93,8 +94,7 @@ function plot_foil_yz_distance(
         end
     end
 
-    fig = Figure(size=FIG_size_w, fontsize=FIG_fontsize, figure_padding=2*FIG_figure_padding, px_per_unit=5)
-    # Label(fig[0, 1:3], L"Relative vertex separation in y-z plane \\ Simulated Decay - Simulated Escape $$")
+    fig = Figure(size=f_size, fontsize=FIG_fontsize, figure_padding=1.5*FIG_figure_padding, px_per_unit=5)
     ax1 = Axis(
         fig[1, 1],
         xlabel=L"$\Delta y$ [mm]",
@@ -105,8 +105,7 @@ function plot_foil_yz_distance(
         fig[1, 3],
         xlabel=L"$r$ [mm]",
         ylabel=L"count $$",
-        # aspect=1,
-        # limits=(nothing, nothing,0,5e6)
+        aspect=1,
     )
 
     h2d = Hist2D((view(dy, indexes_to_keep), view(dz, indexes_to_keep)); binedges=binning2D)
@@ -118,10 +117,10 @@ function plot_foil_yz_distance(
     c = Colorbar(
         fig[1, 2],
         p1,
-        height=Relative(1),
+        height=Relative(0.8),
     )
-    colgap!(fig.layout, 2, Relative(0.2))
-    colgap!(fig.layout, 1, Relative(-0.04))
+
+    colgap!(fig.layout, 1, Relative(0.01))
     resize_to_layout!(fig)
     return fig, h1d, h2d
 end
@@ -225,6 +224,7 @@ function plot_grid_E_t_vertex_sizes(
     hE = []
     ht = []
     for (E, t) in zip(E_vals, t_vals)
+
         dE = @chain df begin
             @subset E .<= :simuE .< E + E_step
         end
@@ -307,13 +307,13 @@ function plot_grid_E_t_vertex_sizes(
 end
 
 function plot_grid_E_t_vertex_sizes(
-    dy, dz, E, t, r;
-    E_vals = [500, 1500, 2500],
-    E_step = 1000,
-    t_vals = [0.0, 0.083, 2*0.083],
-    t_step = 0.083,
+    dy::Vector{<:Real}, dz::Vector{<:Real}, E::Vector{<:Real}, t::Vector{<:Real}, r::Vector{<:Real};
+    E_vals::Vector{<:Real} = [500, 1500, 2500],
+    E_step::Real = 1000,
+    t_vals::Vector{<:Real} = [0.0, 0.083, 2*0.083],
+    t_step::Real = 0.083,
     f_size = FIG_size_w,
-    normed = false,
+    normed::Bool = false,
     binning2D = (range(-5, 5, 50), range(-5, 5, 50))
 )
     hE = []
@@ -359,7 +359,7 @@ function plot_grid_E_t_vertex_sizes(
         ) |> minimum
     @show c_range = (smallest_bin, largest_bin)
 
-    fig = Figure(size=f_size, fontsize=FIG_fontsize, figure_padding=FIG_figure_padding, px_per_unit=6)
+    fig = Figure(size=f_size, fontsize=10, figure_padding=FIG_figure_padding, px_per_unit=6)
     p = []
     for (i, e) in enumerate(E_vals)
         if(i==1)
@@ -367,18 +367,24 @@ function plot_grid_E_t_vertex_sizes(
                 fig[1, i],
                 ylabel=L"$\Delta z$ [mm]",
                 title=L"$E_{i} \in (%$e, %$(e+E_step))$ keV",
-                aspect=1,
+                titlesize= 12,
+                aspect=DataAspect(),
+                xticklabelsize = 10,
+                yticklabelsize = 10,
             )
         else
             ax = Axis(
                 fig[1, i],
                 title=L"$E_{i} \in (%$e, %$(e+E_step))$ keV",
-                aspect=1,
+                aspect=DataAspect(),
+                titlesize= 12,
+                xticklabelsize = 10,
+                yticklabelsize = 10,
             )
-            hideydecorations!(ax, grid=false, minorgrid=false)
+            # hideydecorations!(ax, grid=false, minorgrid=false)
         end
 
-        hidexdecorations!(ax, grid=false, minorgrid=false)
+        # hidexdecorations!(ax, grid=false, minorgrid=false)
 
         p1 = plot!(ax, hE[i], colorscale=log10, colorrange=c_range)
         push!(p, p1)
@@ -390,28 +396,36 @@ function plot_grid_E_t_vertex_sizes(
                 xlabel=L"$\Delta y$ [mm]",
                 ylabel=L"$\Delta z$ [mm]",
                 title=L"$t \in (%$tt, %$(round(tt+t_step, sigdigits=2)))$ mm",
-                aspect=1,
+                aspect=DataAspect(),
+                titlesize= 12,
+                xticklabelsize = 10,
+                yticklabelsize = 10,
             )
         else
             ax = Axis(
                 fig[2, i],
                 xlabel=L"$\Delta y$ [mm]",
                 title=L"$t \in (%$tt, %$(round(tt+t_step, sigdigits=2)))$ mm",
-                aspect=1,
+                aspect=DataAspect(),
+                titlesize= 12,
+                xticklabelsize = 10,
+                yticklabelsize = 10,
             )
-            hideydecorations!(ax, grid=false, minorgrid=false)
+            # hideydecorations!(ax, grid=false, minorgrid=false)
         end
 
         p1 = plot!(ax, ht[i], colorscale=log10, colorrange=c_range)
 
         push!(p, p1)
     end
+
     Colorbar(fig[1:2, end+1], p[end], height=Relative(1),)
+    rowgap!(fig.layout, 1, Relative(0.02))
     return fig
 end
 
 function plot_E_t_subsets_r(
-    dy, dz, E, t, r;
+    dy::Vector{<:Real}, dz::Vector{<:Real}, E::Vector{<:Real}, t::Vector{<:Real}, r::Vector{<:Real};
     E_vals = [500, 1500, 2500],
     E_step = 1000,
     t_vals = [0.0, 0.083, 2*0.083],
@@ -423,6 +437,7 @@ function plot_E_t_subsets_r(
     hE = []
     ht = []
     for (_E, _t) in zip(E_vals, t_vals)
+        println("processing _E = $(_E), _t = $(_t) data")
         indexes_to_keep_E = Int[]
         Threads.@threads for i in eachindex(E)
             if( 

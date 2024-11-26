@@ -16,7 +16,7 @@ set_theme!(my_makie_theme())
 
 # DATA PREPARATION
 # data = load_data(CAT_FILE, VERTEX_POS_VARS)
-f = ROOTFile(datadir("sims/Boff/0/CAT.root"))
+f = ROOTFile(datadir("sims/Boff/CAT.root"))
 data = LazyTree(f, "tree", VERTEX_POS_VARS) |> DataFrame
 
 # FakeItTillYouMakeIt events have SE set to 0, we can filter them out now

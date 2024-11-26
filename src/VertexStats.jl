@@ -1,23 +1,24 @@
 mutable struct Vertex_stats
-    E_min
-    E_max
-    t_min
-    t_max
-    mean_2d
-    max_2d
-    min_2d
-    mean_1d
-    std_1d
-    q50_1d
-    q90_1d
-    q99_1d
-    sigma_1d
-    sigma2_1d
-    sigma3_1d
+    E_min::Real
+    E_max::Real
+    t_min::Real
+    t_max::Real
+    mean_2d::Tuple{<:Real, <:Real}
+    max_2d::Tuple{<:Real, <:Real}
+    min_2d::Tuple{<:Real, <:Real}
+    mean_1d::Real
+    std_1d::Real
+    q50_1d::Real
+    q90_1d::Real
+    q99_1d::Real
+    sigma_1d::Real
+    sigma2_1d::Real
+    sigma3_1d::Real
+    percent_passed::Real
 end
     
 function get_vertex_stats(
-        dy, dz, E, t, r;
+        dy::Vector{<:Real}, dz::Vector{<:Real}, E::Vector{<:Real}, t::Vector{<:Real}, r::Vector{<:Real};
         t_range=(0.0, 0.25),
         binning2D=(range(-4, 4, 50), range(-4, 4, 50)),
         binning1D=range(0, 2, 50),
@@ -41,17 +42,18 @@ function get_vertex_stats(
     sigma_1d = quantile(h1, 0.682689492137086)
     sigma2_1d = quantile(h1, 0.954499736103642)
     sigma3_1d = quantile(h1, 0.997300203936740)
+    percent_passed = (h1 |> integral) / length(dy) * 100
 
     return Vertex_stats(
         E_min, E_max, t_min, t_max, 
         mean_2d, max_2d, min_2d, 
-        mean_1d, std_1d, q50_1d, q90_1d, q99_1d, sigma_1d, sigma2_1d, sigma3_1d
+        mean_1d, std_1d, q50_1d, q90_1d, q99_1d, sigma_1d, sigma2_1d, sigma3_1d, percent_passed
         )
 end
 
 
 function get_vertex_stats_df(
-        dy, dz, E, t, r;
+        dy::Vector{<:Real}, dz::Vector{<:Real}, E::Vector{<:Real}, t::Vector{<:Real}, r::Vector{<:Real};
         E_vals = [500, 1500, 2500], E_step = 1000,t_vals = [0.0, 0.083, 2*0.083], t_step = 0.083,
         t_range=(0.0, 0.25), binning2D=(range(-4, 4, 50), range(-4, 4, 50)), binning1D=range(0, 2, 50),
         E_range=(0.0, 3500.0)
@@ -82,7 +84,8 @@ function get_vertex_stats_df(
         q99_1d = [v.q99_1d for v in vertex_stats],
         sigma_1d = [v.sigma_1d for v in vertex_stats],
         sigma2_1d = [v.sigma2_1d for v in vertex_stats],
-        sigma3_1d = [v.sigma3_1d for v in vertex_stats]
+        sigma3_1d = [v.sigma3_1d for v in vertex_stats],
+        percent_passed = [v.percent_passed for v in vertex_stats],
     )
 
 
