@@ -100,7 +100,7 @@ let
 
     for (i,e) in zip(e_ticks[1], midpoints(binedges(h2)[1]))
         for (j, t) in zip(t_ticks[1], midpoints(binedges(h2)[2]))
-            txtcolor = lookup(h2, e, t) > 20 ? :white : :black
+            txtcolor = lookup(h2, e, t) > 40 ? :white : :black
             text!(a, "$(round(lookup(h2, e, t), digits = 2))", position = (i, j),
                 color = txtcolor, align = (:center, :center))
         end
