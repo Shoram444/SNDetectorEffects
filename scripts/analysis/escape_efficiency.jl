@@ -10,50 +10,15 @@ using Revise
 
 push!(LOAD_PATH, srcdir())
 using DetectorEffects
-using FHist, UnROOT, DataFramesMeta, CairoMakie, LaTeXStrings, StatsBase, PrettyTables, Glob
+using FHist, UnROOT, DataFramesMeta, CairoMakie, LaTeXStrings, StatsBase, PrettyTables, Glob, ColorSchemes
 Revise.track(DetectorEffects)
 set_theme!(my_makie_theme())
 
 nSimulated = 100_000
+root_file_name = "efficiency_count.root"
+pattern = joinpath("data/sims/eff", "300_um", "*_keV", "*", root_file_name)
 
-function get_nEvents(path)
-    f = ROOTFile(path) 
-    return LazyTree(f, "tree", keys(f["tree"])) |> length
-end
-
-function get_energy_from_path(path)
-    s = split(path, "/")
-    e = split(s[end-2], "_")[1]
-    parse(Int, e)
-end
-
-function get_thickness_from_path(path)
-    s = split(path, "/")
-    t = split(s[end-3], "_")[1]
-    parse(Int, t)
-end
-
-
-function load_efficiency_data(root_file_name)
-    # Work/Falaise/mountSPS/Projects/PhD/Cluster_sim_data/Job33_100kpf/
-    pattern = joinpath("Work/Falaise/mountSPS/Projects/PhD/Cluster_sim_data/Job33_100kpf", "*_um", "*_keV", "*", root_file_name)
-    # pattern = joinpath(datadir("sims/eff"), "*_um", "*_keV", "*", "efficiency_count.root")
-    paths = glob(pattern)
-    t = Int[]
-    e = Int[]
-    n = Int[]
-
-    for path in paths
-        println("processing $path")
-        push!(t, get_thickness_from_path(path))
-        push!(e, get_energy_from_path(path))
-        push!(n, get_nEvents(path))
-    end
-
-    return DataFrame(thickness = t, energy = e, nEscaped = n)
-end
-
-data = load_efficiency_data("efficiency.root")
+data = load_efficiency_data(pattern)
 
 df = @chain data begin
     @groupby :thickness :energy
@@ -96,17 +61,22 @@ let
         titlesize = 16,
         
         ) 
-    p = heatmap!(a, bincounts(h2), colormap = Makie.to_colormap(ColorSchemes.:jblue ))
+    p = heatmap!(a, bincounts(h2), colormap = Makie.to_colormap(ColorSchemes.:jblue), colorrange = (0,100))
 
     for (i,e) in zip(e_ticks[1], midpoints(binedges(h2)[1]))
         for (j, t) in zip(t_ticks[1], midpoints(binedges(h2)[2]))
-            txtcolor = lookup(h2, e, t) > 40 ? :white : :black
-            text!(a, "$(round(lookup(h2, e, t), digits = 2))", position = (i, j),
-                color = txtcolor, align = (:center, :center))
+            txtcolor = lookup(h2, e, t) > 30 ? :white : :black
+            text!(
+                a, 
+                "$(round(lookup(h2, e, t), digits = 2))", 
+                position = (i, j),
+                color = txtcolor, 
+                align = (:center, :center)
+            )
         end
     end
 
-    Colorbar(f[1,2], p, label = L"probability (%) $$", labelsize = 19)
-    safesave(plotsdir("escape_efficiencies", "heatmap.png"), f)
+    Colorbar(f[1,2], p, label = L"probability (%) $$", labelsize = 19,)
+    # safesave(plotsdir("escape_efficiencies", "heatmap.png"), f)
     f
 end
