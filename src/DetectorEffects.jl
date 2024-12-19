@@ -66,6 +66,7 @@ export
     get_nEvents,
     get_energy_from_path,
     get_thickness_from_path,
-    load_efficiency_data
+    load_efficiency_data,
+    load_efficiency_nReco_data
 
 end
