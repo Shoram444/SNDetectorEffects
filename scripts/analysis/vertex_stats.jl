@@ -16,7 +16,7 @@ set_theme!(my_makie_theme())
 
 # DATA PREPARATION
 # data = load_data(CAT_FILE, VERTEX_POS_VARS)
-f = ROOTFile(datadir("sims/Boff/0/CAT.root"))
+f = ROOTFile(datadir("sims/Boff/CAT.root"))
 data = LazyTree(f, "tree", VERTEX_POS_VARS) 
 
 E = Float32[]
@@ -93,77 +93,97 @@ end
 
 
 
-# v_stats = get_vertex_stats_df(
-#     dy, dz, E, t, r;
-#     E_vals = [500, 1500, 2500], E_step = 1000,t_vals = [0.0, 0.083, 2*0.083], t_step = 0.083,
-#     t_range=(0.0, 0.25), binning2D=(range(-11, 11, 50), range(-11, 11, 50)), binning1D=range(0, 2, 50),
-#     E_range=(0.0, 3500.0)
-# )
-
-# pretty_table(v_stats)
-# safesave(CSV.write(plotsdir("vertex_stats/vertex_stats_CAT_full_array.csv"), v_stats))
-
-
-# fig_grid_E_t_vertex_sizes = plot_grid_E_t_vertex_sizes(
-#     dy, dz, E, t, r;
-#     E_vals = [500, 1500, 2500],
-#     E_step = 1000,
-#     t_vals = [0.0, 0.083, 2*0.083],
-#     t_step = 0.083,
-#     f_size = FIG_size_w,
-#     normed = true,
-#     binning2D = (range(-5, 5, 50), range(-5, 5, 50)),
-#     dy, dz, E, t, r;
-#     E_vals = [500, 1500, 2500],
-#     E_step = 1000,
-#     t_vals = [0.0, 0.083, 2*0.083],
-#     t_step = 0.083,
-#     f_size = FIG_size_w,
-#     normed = true,
-#     binning1D=range(0, 2, 50),
-# )
-# safesave(plotsdir("foil_effects/plot_E_t_subsets_r.png"), fig_E_t_subsets_r)
-
-
-df = DataFrame(
-    E  = E ,
-    t  = t ,
-    r  = r ,
-    dy = dy,
-    dz = dz,
+v_stats = get_vertex_stats_df(
+    dy, dz, E, t, r;
+    E_vals = [500, 1500, 2500], E_step = 1000,t_vals = [0.0, 0.083, 2*0.083], t_step = 0.083,
+    t_range=(0.0, 0.25), binning2D=(range(-11, 11, 50), range(-11, 11, 50)), binning1D=range(0, 2, 50),
+    E_range=(0.0, 3500.0)
 )
 
-r_cut = quantile(df.r, 0.99)
-filter!(row -> row.r < r_cut, df)
+pretty_table(v_stats)
+# safesave(CSV.write(plotsdir("vertex_stats/vertex_stats_CAT_full_array.csv"), v_stats))
 
-gdf = @chain df begin
-    @transform :E_bins = cut(:E, [0, 500, 1500, 2500, 3500])
-    @groupby :E_bins
-    @combine :r_mean = mean(:r)
-end
-
-df_cut = @chain df begin
-    @transform :E_bins = cut(:E, [0, 500, 1500, 2500, 3500])
-    @groupby :E_bins
-end
-let 
-    f = Figure()
-    a = Axis(f[1,1], yscale =log10, limits = (0,3,1,100000))
-    stephist!(a, df_cut[2].r , bins = 100, )
-    stephist!(a, df_cut[3].r , bins = 100, )
-    stephist!(a, df_cut[4].r , bins = 100, )
-    f
+E_stats = @chain v_stats begin
+    @orderby :E_min
+    @select :E_min :E_max :mean_1d :std_1d :sigma3_1d 
 end
 
-df_cut = @chain df begin
-    @transform :t_bins = cut(:t, [0, 0.25/3, 0.25/3*2, 0.25, 0.3])
-    @groupby :t_bins
+pretty_table(
+    E_stats[4:end, :], 
+    header = (
+        [L"E_{min}", L"E_{max}", L"\bar{r}", L"\sigma", L"3\sigma"],
+        [L"(keV)", L"(keV)", L"(mm)", L"(mm)", L"(mm)"]
+    ), 
+    backend = Val(:latex)
+)
+
+t_stats = @chain v_stats begin
+    @orderby :t_min
+    @select :t_min :t_max :mean_1d :std_1d :sigma3_1d 
 end
-let 
-    f = Figure()
-    a = Axis(f[1,1], yscale =log10, limits = (0,2,1,100000))
-    stephist!(a, df_cut[1].r , bins = 100, )
-    stephist!(a, df_cut[2].r , bins = 100, )
-    stephist!(a, df_cut[3].r , bins = 100, )
-    f
-end
+
+pretty_table(
+    t_stats[[2, 5, 6], :], 
+    header = (
+        [L"t_{min}", L"t_{max}", L"\bar{r}", L"\sigma", L"3\sigma"],
+        [L"(mm)", L"(mm)", L"(mm)", L"(mm)", L"(mm)"]
+    ), 
+    backend = Val(:latex)
+)
+
+
+fig_grid_E_t_vertex_sizes = plot_E_t_subsets_r(
+    dy, dz, E, t, r;
+    E_vals = [500, 1500, 2500],
+    E_step = 1000,
+    t_vals = [0.0, 0.083, 2*0.083],
+    t_step = 0.083,
+    f_size = FIG_size_w,
+    normed = true,
+    binning1D = range(0, 2, 50),
+)
+safesave(plotsdir("foil_effects/plot_E_t_subsets_r.png"), fig_grid_E_t_vertex_sizes)
+
+
+# df = DataFrame(
+#     E  = E ,
+#     t  = t ,
+#     r  = r ,
+#     dy = dy,
+#     dz = dz,
+# )
+
+# r_cut = quantile(df.r, 0.99)
+# filter!(row -> row.r < r_cut, df)
+
+# gdf = @chain df begin
+#     @transform :E_bins = cut(:E, [0, 500, 1500, 2500, 3500])
+#     @groupby :E_bins
+#     @combine :r_mean = mean(:r)
+# end
+
+# df_cut = @chain df begin
+#     @transform :E_bins = cut(:E, [0, 500, 1500, 2500, 3500])
+#     @groupby :E_bins
+# end
+# let 
+#     f = Figure()
+#     a = Axis(f[1,1], yscale =log10, limits = (0,3,1,100000))
+#     stephist!(a, df_cut[2].r , bins = 100, )
+#     stephist!(a, df_cut[3].r , bins = 100, )
+#     stephist!(a, df_cut[4].r , bins = 100, )
+#     f
+# end
+
+# df_cut = @chain df begin
+#     @transform :t_bins = cut(:t, [0, 0.25/3, 0.25/3*2, 0.25, 0.3])
+#     @groupby :t_bins
+# end
+# let 
+#     f = Figure()
+#     a = Axis(f[1,1], yscale =log10, limits = (0,2,1,100000))
+#     stephist!(a, df_cut[1].r , bins = 100, )
+#     stephist!(a, df_cut[2].r , bins = 100, )
+#     stephist!(a, df_cut[3].r , bins = 100, )
+#     f
+# end

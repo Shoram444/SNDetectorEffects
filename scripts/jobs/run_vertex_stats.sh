@@ -10,11 +10,10 @@
 
 #SBATCH --time=0-1                 	 	 # Time for the job in format “minutes:seconds” or  “hours:minutes:seconds”, “days-hours”
 #SBATCH --cpus-per-task=6                # Number of CPUs
+#SBATCH --output="/pbs/home/m/mpetro/sps_mpetro/Projects/PhD/SNDetectorEffects/scripts/jobs/logs/%A.out"
+#SBATCH --error="/pbs/home/m/mpetro/sps_mpetro/Projects/PhD/SNDetectorEffects/scripts/jobs/logs/%A.err"
 
-LOGFILE=$(mktemp "logs/job_XXXXXX.log")
-exec > >(tee -a $LOGFILE) 2>&1
-
-JULIA=/sps/nemo/scratch/mpetro/PROGRAMS/julia/juliaup/julia-1.11.1+0.x64.linux.gnu/bin
+JULIA=/sps/nemo/scratch/mpetro/PROGRAMS/julia/juliaup/julia-1.10.0+0.x64.linux.gnu/bin
 SCRIPTS=/pbs/home/m/mpetro/sps_mpetro/Projects/PhD/SNDetectorEffects/scripts/analysis
 PROJECT="/pbs/home/m/mpetro/sps_mpetro/Projects/PhD/SNDetectorEffects"
 

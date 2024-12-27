@@ -484,7 +484,9 @@ function plot_E_t_subsets_r(
             ylabel=L"count $$",
             xlabel=L"r [mm] $$",
             aspect = 1,
-            title = L"Energy subsets $$"
+            title = L"Energy subsets $$",
+            yscale = log10,
+            limits = (nothing, nothing, 1e-5, 1e1)
         )
     ax2 = Axis(
             fig[1, 2],
@@ -492,7 +494,9 @@ function plot_E_t_subsets_r(
             xlabel=L"r [mm] $$",
             aspect = 1,
             yaxisposition = :right,
-            title = L"Depth subsets $$"
+            title = L"Depth subsets $$",
+            yscale = log10,
+            limits = (nothing, nothing, 1e-5, 1e1)
         )
 
     colors = ColorSchemes.tol_vibrant
@@ -513,8 +517,8 @@ function plot_E_t_subsets_r(
             color = colors[4+i]
         )
     end
-    ylims!(ax1, 0, 7)
-    ylims!(ax2, 0, 7)
+    ylims!(ax1, 5e-2, 20)
+    ylims!(ax2, 5e-2, 20)
     
     axislegend(ax1, labelsize = 12, padding = 3)
     axislegend(ax2, labelsize = 12, padding = 3)

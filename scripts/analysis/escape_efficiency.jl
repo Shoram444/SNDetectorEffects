@@ -34,6 +34,7 @@ end
 
 e_bins = vcat(unique(df.energy)[2:end], 4000)
 t_bins = vcat(unique(df.thickness), 2000)
+
 h2 = Hist2D(;
     binedges = (e_bins, t_bins),
     counttype = Float64,
@@ -43,10 +44,12 @@ h2 = Hist2D(;
 for row in eachrow(df)
     push!(h2, row.energy, row.thickness, row.efficiency_percent)
 end
+
+
 let
     e_ticks = (1:length(e_bins), string.(e_bins))
     t_ticks = (1:length(t_bins), string.(t_bins))
-    f = Figure(size=(420, 260), fontsize=10, figure_padding=4, px_per_unit=5)
+    f = Figure(size=(5/7*420, 5/7*260), fontsize=7, figure_padding=4, px_per_unit=5)
     a = Axis(
         f[1,1], 
         ylabel = L"thickness ($\mu m$)", 
@@ -54,18 +57,17 @@ let
         xticks = e_ticks,
         yticks = t_ticks,
         title = L"$$ Probability for an electron to escape the source foil \n for a combination of thickness and energy",
-        xticklabelsize = 10,
-        yticklabelsize = 10,
-        xlabelsize = 12,
-        ylabelsize = 12,
-        titlesize = 12,
-        
+        xticklabelsize = 9,
+        yticklabelsize = 9,
+        xlabelsize = 10,
+        ylabelsize = 10,
+        titlesize = 10,
         ) 
-    p = heatmap!(a, bincounts(h2), colormap = Makie.to_colormap(ColorSchemes.:jblue), colorrange = (0,100))
+    p = heatmap!(a, bincounts(h2), colormap = Makie.to_colormap(ColorSchemes.RdBu) , colorrange = (0,100))
 
     for (i,e) in zip(e_ticks[1], midpoints(binedges(h2)[1]))
         for (j, t) in zip(t_ticks[1], midpoints(binedges(h2)[2]))
-            txtcolor = lookup(h2, e, t) > 40 ? :white : :black
+            txtcolor = lookup(h2, e, t) > 70 ? :white : :black
             text!(
                 a, 
                 "$(round(lookup(h2, e, t), digits = 2))", 
@@ -75,11 +77,13 @@ let
             )
         end
     end
+   
+    Colorbar(f[1,2], p, label = L"probability (%) $$", labelsize = 10,)
 
-    Colorbar(f[1,2], p, label = L"probability (%) $$", labelsize = 12,)
     safesave(plotsdir("escape_efficiencies", "heatmap.png"), f)
     f
 end
+
 
 
 nSimulated = 100_000
