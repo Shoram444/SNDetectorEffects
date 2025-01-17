@@ -14,9 +14,9 @@ using FHist, UnROOT, DataFramesMeta, CairoMakie, LaTeXStrings, StatsBase, Pretty
 Revise.track(DetectorEffects)
 set_theme!(my_makie_theme())
 
-nSimulated = 100_000
+nSimulated = 10_000
 root_file_name = "efficiency_count.root"
-pattern = joinpath("data/sims/eff", "*_um", "*_keV", "*", root_file_name)
+pattern = joinpath("data/sims/Boff_150Nd/Job33_10kpf_150Nd", "*_um", "*_keV", "*", root_file_name)
 
 data = load_efficiency_data(pattern)
 
@@ -80,15 +80,15 @@ let
    
     Colorbar(f[1,2], p, label = L"probability (%) $$", labelsize = 10,)
 
-    safesave(plotsdir("escape_efficiencies", "heatmap.png"), f)
+    safesave(plotsdir("escape_efficiencies", "Nd150_heatmap.png"), f, px_per_unit=6)
     f
 end
 
 
 
-nSimulated = 100_000
+nSimulated = 10_000
 root_file_name2 = "efficiency_count.root"
-pattern2 = joinpath("data/sims/eff", "250_um", "*_keV", "*", root_file_name2)
+pattern2 = joinpath("data/sims/Boff_150Nd/Job33_10kpf_150Nd", "250_um", "*_keV", "*", root_file_name2)
 
 data2 = load_efficiency_nReco_data(pattern2)
 
@@ -162,7 +162,7 @@ let
     end
 
     Colorbar(f[1,2], p, label = L"probability (%) $$", labelsize = 19,)
-    safesave(plotsdir("escape_efficiencies", "heatmap_nReco.png"), f)
+    safesave(plotsdir("escape_efficiencies", "Nd150_heatmap_nReco.png"), f, px_per_unit=6)
     f
 end
 

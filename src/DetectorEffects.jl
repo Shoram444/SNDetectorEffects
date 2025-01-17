@@ -49,7 +49,14 @@ export
 include("AnglesPlots.jl")
 export 
     plot_angles_1D,
-    plot_angles_theta_vs_phiSE
+    plot_angles_theta_vs_phiSE,
+    plot_h1_h2,
+    plot_angles_subsets
+
+include("AnglesStats.jl")
+export 
+    get_sigma,
+    get_sigma_stats_E_t
 
 include("FitFunctions.jl")
 export 

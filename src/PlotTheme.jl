@@ -5,8 +5,8 @@ function my_makie_theme(spinewidth = 1.5, gridwidth = 1.5)
     colors = ColorSchemes.tol_vibrant
     
     # cmap = Makie.to_colormap([ColorSchemes.tol_vibrant[3],ColorSchemes.tol_vibrant[5]])
-    cmap = Makie.to_colormap(ColorSchemes.jet)
-    # cmap = Makie.to_colormap(ColorSchemes.:linear_kbc_5_95_c73_n256 |> reverse)
+    # cmap = Makie.to_colormap(ColorSchemes.jet)
+    cmap = Makie.to_colormap(ColorSchemes.:coolwarm)
     cpalette = Attributes(
         color = colors,
         patchcolor = colors,

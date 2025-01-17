@@ -90,4 +90,6 @@ const ANGLES_VARS = [
     "simuEnergy2",
     "z1RE",
     "z2RE",
+    "x1SD",
+    "x2SD",
 ]
